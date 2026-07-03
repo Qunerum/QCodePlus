@@ -8,10 +8,12 @@ extern struct QCP_Node* root;
 struct QCP_Node* actualFunc;
 
 void madeLine(char line[MAX_LINE_SIZE]) {
+	trimStart(line, ' ');
+	trimStart(line, '\t');
 	int l = len(line);
+	if (l <= 0) return;
 	if (line[l-1] == '\n') line[l-1] = '\0';
-	trimStart(line, ' '); trimStart(line, '\t');
-	// printf("'%s'\n", line);
+	if (l >= 2 && line[0] == '/' && line[1] == '/') return;
 	char list[16][256];
 	int max = split(line, ' ', list);
 	if (max <= 0) return;

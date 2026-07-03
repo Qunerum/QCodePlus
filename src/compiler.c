@@ -122,9 +122,11 @@ int endCompiler() {
 		add(1, "mov rax, 60");
 		add(1, "mov rdi, 0");
 		add(1, "syscall");
+
+
+
 		fclose(out);
 		free(root);
-
 		printf("Compiling to binary...\n");
 		if (system(os ? "nasm -f elf64 qcp_obj/out.asm -o qcp_obj/out.o" : "nasm -f elf64 qcp_obj\\out.asm -o qcp_obj\\out.o")) { printf("Assembler compilation error!\n"); return 1; }
 		if (system(os ? "ld qcp_obj/out.o -o program" : "ld qcp_obj\\out.o -o program.exe")) { printf("Linking error!\n"); return 1; }

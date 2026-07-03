@@ -1,29 +1,20 @@
-default rel
 ; db - 255
 ; dw - 65 535
 ; dd - 4 294 967 295
 ; dq - 18 446 744 073 709 551 615
+
+; QCode Plus v. 0.0.8
+default rel
 ; = = = = = = = = = = VARIABLES = = = = = = = = = =
 section .data
-	nl db 10 ; \n
-	nll equ $ - nl ; \n len
-	main_int_x dd 0 ; <func-name>_<var-type>_<var-name>
-	public_int_y dd 24 ; public_<var-type>_<var-name>
-	test_str db "Hello, World!", 10, "x is: "
-	test_str_len equ $ - test_str
-
-	test_string_bufor_len dd 0
-
-	_QCP_FUNC_test_ARG_x dd 0
-	_QCP_FUNC_test_CMD_print_1 db "Hello, World!"
-	_QCP_FUNC_test_CMD_print_2 db 10
-	_QCP_FUNC_test_CMD_print_3 db "Your value is: "
-	_QCP_FUNC_test_CMD_print_4 db v:x
-	_QCP_FUNC_test_CMD_print_5 db 10
+	nl db 10
+	nll equ $ - nl
+	qcp_int_x dd 15 ; int x = 15;
+	qcp_print_0_0 db "Hello, World!" ; print("Hello, World!");
+	qcp_print_0_0_len equ $ - qcp_print_0_0 ; print("Hello, World!");
 
 section .bss
-	bufor resb 12
-	test_string_bufor resb 4096
+	itt_bfr resb 12
 
 ; = = = = = = = = = = INT TO TEXT = = = = = = = = = =
 section .text
@@ -39,9 +30,9 @@ intToText:
 	inc rcx
 	cmp eax, 0
 	jne .ittLoop
-	lea rdi, [rel bufor]
+	lea rdi, [rel itt_bfr]
 	mov rdx, rcx
-	lea rsi, [rel bufor]
+	lea rsi, [rel itt_bfr]
 .ittLoopWrite:
 	pop rax
 	mov [rdi], al
@@ -55,20 +46,62 @@ prt:
 	mov rdi, 1
 	syscall
 	ret
-; = = = = = = = = = = FUNCTIONS = = = = = = = = = =
-_QCP_FUNC_test:
-	;
-	ret
-; = = = = = = = = = = MAIN = = = = = = = = = =
-_start:
-	; User Code
-	lea rsi, [rel test_str]
-	mov rdx, test_str_len
-	call prt ; Print line
+prtln:
 	lea rsi, [rel nl]
 	mov rdx, nll
-	call prt ; Print line
+	mov rax, 1
+	mov rdi, 1
+	syscall
+	ret
+; = = = = = = = = = = CODE = = = = = = = = = =
+; int x = 15;
+;
+; func main() {
+; 	int y = 7;
+; 	int z = 2;
+; 	x += y;
+; 	x += z;
+; 	if (x == 24) {
+; 		print(v:x 10);
+; 	}
+; }
+;
+; func test() {
+; 	print("Hello, World!");
+; }
+_start:
+	sub rsp, 16 ; int y = 7; | int z = 2;
+
+	mov dword [rsp], 7 ; int y = 7;
+	mov dword [rsp+8], 2 ; int z = 2;
+
+	mov eax, [rsp]                  ; x += y;
+	add dword [rel qcp_int_x], eax  ; x += y;
+
+	mov eax, [rsp+8]               ; x += z;
+	add dword [rel qcp_int_x], eax ; x += z;
+
+	call _qcp_func_test ; test();
+
+	mov eax, [rel qcp_int_x] ; if (x == 24)
+	cmp eax, 24              ; if (x == 24)
+	jne .if_0_end            ; if (x == 24)
+
+	mov eax, [rel qcp_int_x] ; print('v:x' 10);
+	call intToText           ; print('v:x' 10);
+	call prt                 ; print('v:x' 10);
+	call prtln               ; print(v:x '10');
+
+.if_0_end:
 	; = = = END = = =
+	add rsp, 16 ; int y = 7; | int z = 2;
+
 	mov rax, 60
 	mov rdi, 0
 	syscall
+	ret
+_qcp_func_test:
+	mov rsi, qcp_print_0_0     ; print("Hello, World!");
+	mov rdx, qcp_print_0_0_len ; print("Hello, World!");
+	call prt
+	ret
