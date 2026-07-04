@@ -3,7 +3,6 @@
 **/.obj/
 **/build/
 **/*.sh
-**/*.qcp
 **/*.kate-swp
 
 **/qcp_obj/
