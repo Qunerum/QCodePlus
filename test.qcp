@@ -14,7 +14,7 @@ func main() {
 
 func test() {
 	int x = 13;
-	print("Hello, World!", 10, "Binary: " b:x'5 10 "HEX: 0x" h:x'3 10);
+	print("Hello, World!" 10 "Binary: " b:x'5 10 "HEX: 0x" h:x'3 10);
 	// Hello, World!
 	// Binary: 01101
 	// HEX: 0x00D
