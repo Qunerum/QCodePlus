@@ -20,7 +20,6 @@ struct QCP_Node {
 	struct QCP_Node* child;
 	struct QCP_Node* next;
 };
-#define EXPECTED 100
 void err(int line, const char* lineContent, int code);
 struct QCP_Node* createNode(QCP_Node_Type type, char* name, char* value);
 void addChild(struct QCP_Node* parent, struct QCP_Node* newChild);

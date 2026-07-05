@@ -4,10 +4,17 @@
 #include "tools.h"
 #include "parser.h"
 #include "compiler.h"
+#include "errors.h"
+
+#define RST    "\033[0m"
+#define RED    "\033[31m"
+#define GREEN  "\033[32m"
+#define BLUE   "\033[34m"
 
 void err(int line, const char* lineContent, int code) {
-    printf("\033[31m[QCP Compiler] ERROR [%03d] at line %d:\n", code, line);
-    printf("  %d | %s\033[0m\n", line, lineContent);
+    printf(RED"[QCP Compiler] SYNTAX ERROR [%03d] at line %d:\n", code, line);
+    printf("  %d | %s\n", line, lineContent);
+    if (code < QCP_ERROR_LIST) printf("%s\n"RST, qcp_error[code]); else printf("Unkown error code!\n"RST);
     exit(1);
 }
 

@@ -17,6 +17,10 @@ section .bss
 	itt_bfr resb 12
 
 ; = = = = = = = = = = INT TO TEXT = = = = = = = = = =
+; mov eax, [value]
+; call intToText
+; prt
+; OUT: rsi(text) & rdx(text len)
 section .text
 	global _start
 intToText:
@@ -41,6 +45,9 @@ intToText:
 	inc rdx
 	ret
 ; = = = = = = = = = = PRINT = = = = = = = = = =
+; mov rsi, [Text]
+; mov rdx, [Text Length]
+; call prt
 prt:
 	mov rax, 1
 	mov rdi, 1

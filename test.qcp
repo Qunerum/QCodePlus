@@ -5,11 +5,7 @@ func main() {
 	int z = 2;
 	x += y;
 	x += z;
-	// run function named 'test'
 	test();
-	if (x == 24) {
-		print(v:x 10);
-	}
 }
 
 func test() {
