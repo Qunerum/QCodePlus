@@ -1,7 +1,7 @@
-; db - 255
-; dw - 65 535
-; dd - 4 294 967 295
-; dq - 18 446 744 073 709 551 615
+; db - 255 - 8B - 2H
+; dw - 65 535 - 16B - 4H
+; dd - 4 294 967 295 - 32B - 8H
+; dq - 18 446 744 073 709 551 615 - 64B - 16H
 
 ; QCode Plus v. 0.0.8
 default rel
@@ -14,7 +14,8 @@ section .data
 	qcp_print_0_0_len equ $ - qcp_print_0_0 ; print("Hello, World!");
 
 section .bss
-	itt_bfr resb 12
+	itt_bfr resb 21
+	prtbh_bfr resb 64
 
 ; = = = = = = = = = = INT TO TEXT = = = = = = = = = =
 ; mov eax, [value]
@@ -60,6 +61,49 @@ prtln:
 	mov rdi, 1
 	syscall
 	ret
+; B - Binary | H - Hex
+; = = = = = = = = = = PRINT BINARY = = = = = = = = = =
+; mov eax, [value]
+; call prtB
+prtB:
+    lea rdi, [rel prtbh_bfr]
+    mov rcx, 32
+.prtBloop:
+    mov edx, eax
+    shr edx, 31
+    add dl, '0'
+    mov [rdi], dl
+    inc rdi
+    shl eax, 1
+    loop .prtBloop
+    mov rsi, prtbh_bfr
+    mov rdx, 32
+    call prt
+    ret
+; = = = = = = = = = = PRINT HEX = = = = = = = = = =
+; mov eax, [value]
+; call prtH
+prtH:
+    lea rdi, [rel prtbh_bfr]
+    mov rcx, 8
+.prtHloop:
+    rol eax, 4
+    mov edx, eax
+    and edx, 0xF
+    cmp dl, 9
+    jbe .prtHdigit
+    add dl, 7
+.prtHdigit:
+    add dl, '0'
+    mov [rdi], dl
+    inc rdi
+    loop .prtHloop
+
+    ; Wypisanie
+    mov rsi, prtbh_bfr
+    mov rdx, 8
+    call prt
+    ret
 ; = = = = = = = = = = CODE = = = = = = = = = =
 ; int x = 15;
 ;
