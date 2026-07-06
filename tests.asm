@@ -10,8 +10,13 @@ section .data
 	nl db 10
 	nll equ $ - nl
 	qcp_int_x dd 15 ; int x = 15;
-	qcp_print_0_0 db "Hello, World!" ; print("Hello, World!");
-	qcp_print_0_0_len equ $ - qcp_print_0_0 ; print("Hello, World!");
+	qcp_print_0 db "Hello, World!"
+	qcp_print_0_len equ $ - qcp_print_0
+
+	qcp_print_1 db "Binary: "
+	qcp_print_1_len equ $ - qcp_print_1
+
+; print("Hello, World!" 10 "Binary: " b:a'5 10 "HEX: 0x" h:a'3 10);
 
 section .bss
 	itt_bfr resb 21
@@ -21,6 +26,7 @@ section .bss
 ; mov eax, [value]
 ; call intToText
 ; prt
+
 ; OUT: rsi(text) & rdx(text len)
 section .text
 	global _start
@@ -64,10 +70,15 @@ prtln:
 ; B - Binary | H - Hex
 ; = = = = = = = = = = PRINT BINARY = = = = = = = = = =
 ; mov eax, [value]
+; mov r8, [length]
 ; call prtB
 prtB:
     lea rdi, [rel prtbh_bfr]
     mov rcx, 32
+    sub rcx, r8
+    shl eax, cl
+    mov rcx, r8
+    lea rdi, [rel prtbh_bfr]
 .prtBloop:
     mov edx, eax
     shr edx, 31
@@ -82,10 +93,15 @@ prtB:
     ret
 ; = = = = = = = = = = PRINT HEX = = = = = = = = = =
 ; mov eax, [value]
+; mov r8, [length]
 ; call prtH
 prtH:
     lea rdi, [rel prtbh_bfr]
     mov rcx, 8
+    sub rcx, r8
+    shl rcx, 2
+    shl eax, cl
+    mov rcx, r8
 .prtHloop:
     rol eax, 4
     mov edx, eax
@@ -99,9 +115,8 @@ prtH:
     inc rdi
     loop .prtHloop
 
-    ; Wypisanie
     mov rsi, prtbh_bfr
-    mov rdx, 8
+    mov rdx, r8
     call prt
     ret
 ; = = = = = = = = = = CODE = = = = = = = = = =
@@ -112,14 +127,17 @@ prtH:
 ; 	int z = 2;
 ; 	x += y;
 ; 	x += z;
-; 	if (x == 24) {
-; 		print(v:x 10);
-; 	}
+; 	test();
 ; }
 ;
 ; func test() {
-; 	print("Hello, World!");
+; 	int a = 13;
+; 	print("Hello, World!" 10 "Binary: " b:a'5 10 "HEX: 0x" h:a'3 10);
+; 	// Hello, World!
+; 	// Binary: 01101
+; 	// HEX: 0x00D
 ; }
+
 _start:
 	sub rsp, 16 ; int y = 7; | int z = 2;
 
@@ -134,17 +152,6 @@ _start:
 
 	call _qcp_func_test ; test();
 
-	mov eax, [rel qcp_int_x] ; if (x == 24)
-	cmp eax, 24              ; if (x == 24)
-	jne .if_0_end            ; if (x == 24)
-
-	mov eax, [rel qcp_int_x] ; print('v:x' 10);
-	call intToText           ; print('v:x' 10);
-	call prt                 ; print('v:x' 10);
-	call prtln               ; print(v:x '10');
-
-.if_0_end:
-	; = = = END = = =
 	add rsp, 16 ; int y = 7; | int z = 2;
 
 	mov rax, 60
@@ -152,7 +159,25 @@ _start:
 	syscall
 	ret
 _qcp_func_test:
-	mov rsi, qcp_print_0_0     ; print("Hello, World!");
-	mov rdx, qcp_print_0_0_len ; print("Hello, World!");
+	sub rsp, 8 ; int a = 13;
+	mov dword [rsp], 13
+
+	mov rsi, qcp_print_0
+	mov rdx, qcp_print_0_len
 	call prt
+	call prtln
+
+	mov eax, [rsp]
+	mov r8, 5
+	call prtB
+
+	call prtln
+
+	mov eax, [rsp]
+	mov r8, 2
+	call prtH
+
+	call prtln
+
+	add rsp, 8
 	ret
