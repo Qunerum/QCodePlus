@@ -9,6 +9,10 @@ default rel
 section .data
 	nl db 10
 	nll equ $ - nl
+	rtxt dd 0
+	qcpia dd 0
+	qcpib dd 0
+
 	qcp_int_x dd 15 ; int x = 15;
 	qcp_print_0 db "Hello, World!"
 	qcp_print_0_len equ $ - qcp_print_0
@@ -33,6 +37,7 @@ section .text
 intToText:
 	mov rcx, 0
 	mov ebx, 10
+	mov eax, [rel qcpia]
 .ittLoop:
 	mov edx, 0
 	div ebx
@@ -69,15 +74,16 @@ prtln:
 	ret
 ; B - Binary | H - Hex
 ; = = = = = = = = = = PRINT BINARY = = = = = = = = = =
-; mov eax, [value]
-; mov r8, [length]
+; RTA [value]
+; RTB [length]
 ; call prtB
 prtB:
+	mov eax, [rel qcpia]
     lea rdi, [rel prtbh_bfr]
     mov rcx, 32
-    sub rcx, r8
+    sub rcx, [rel qcpib]
     shl eax, cl
-    mov rcx, r8
+    mov rcx, [rel qcpib]
     lea rdi, [rel prtbh_bfr]
 .prtBloop:
     mov edx, eax
@@ -88,20 +94,21 @@ prtB:
     shl eax, 1
     loop .prtBloop
     mov rsi, prtbh_bfr
-    mov rdx, 32
+    mov rdx, [rel qcpib]
     call prt
     ret
 ; = = = = = = = = = = PRINT HEX = = = = = = = = = =
-; mov eax, [value]
-; mov r8, [length]
+; RTA [value]
+; RTB [length]
 ; call prtH
 prtH:
+	mov eax, [rel qcpia]
     lea rdi, [rel prtbh_bfr]
     mov rcx, 8
-    sub rcx, r8
+    sub rcx, [rel qcpib]
     shl rcx, 2
     shl eax, cl
-    mov rcx, r8
+    mov rcx, [rel qcpib]
 .prtHloop:
     rol eax, 4
     mov edx, eax
@@ -116,9 +123,17 @@ prtH:
     loop .prtHloop
 
     mov rsi, prtbh_bfr
-    mov rdx, r8
+    mov rdx, [rel qcpib]
     call prt
     ret
+%macro RTA 1
+	mov eax, %1
+	mov [rel qcpia], eax
+%endmacro
+%macro RTB 1
+	mov eax, %1
+	mov [rel qcpib], eax
+%endmacro
 ; = = = = = = = = = = CODE = = = = = = = = = =
 ; int x = 15;
 ;
@@ -167,16 +182,19 @@ _qcp_func_test:
 	call prt
 	call prtln
 
-	mov eax, [rsp]
-	mov r8, 5
-	call prtB
-
+	RTA [rsp]
+	call intToText
+	call prt
 	call prtln
 
-	mov eax, [rsp]
-	mov r8, 2
-	call prtH
+	RTA [rsp]
+	RTB 5
+	call prtB
+	call prtln
 
+	RTA [rsp]
+	RTB 2
+	call prtH
 	call prtln
 
 	add rsp, 8

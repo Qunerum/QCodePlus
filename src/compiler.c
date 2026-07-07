@@ -27,7 +27,12 @@ struct QCP_Node* startCompiler() {
 
 	root = createNode(QCP_ROOT, "root", "");
 
-	add(0, "; QCode Plus v. 0.0.8");
+	add(0, "; db - 255");
+	add(0, "; dw - 65.535");
+	add(0, "; dd - 4.294.967.295");
+	add(0, "; dq - 18.446.744.073.709.551.615");
+	add(0, "");
+	add(0, "; QCode Plus v. 0.0.9");
 	add(0, "default rel");
 	add(0, "; = = = = = = = = = = VARIABLES = = = = = = = = = =");
 	add(0, "section .data");
