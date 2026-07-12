@@ -20,8 +20,7 @@ else
     TARGET_CC = $(CC_LINUX)
 endif
 
-PLATFORM_DIR = $(BUILD_DIR)/$(PLATFORM)
-TARGET = $(PLATFORM_DIR)/qcodeplus$(EXT)
+TARGET = $(BUILD_DIR)/qcodeplus$(EXT)
 
 all: linux win
 
@@ -39,7 +38,7 @@ $(OBJ)/$(PLATFORM)/%.o: $(SRC_DIR)/%.c
 	$(TARGET_CC) $(CFLAGS) -c $< -o $@
 
 $(TARGET): $(OBJS)
-	@mkdir -p $(PLATFORM_DIR)
+	@mkdir -p $(BUILD_DIR)
 	$(TARGET_CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
 run: all

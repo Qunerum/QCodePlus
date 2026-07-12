@@ -14,7 +14,7 @@ void exampleCmd(char list[16][256]) {
 }
 */
 void funcCmd(char list[16][256]) {
-	printf("= = = RUNNING FUNC = =\n");
+	// printf("= = = RUNNING FUNC = =\n");
 	deep++;
 	char name[256];
 	char args[1024];
@@ -22,19 +22,20 @@ void funcCmd(char list[16][256]) {
 	splitSimple(list[1], '(', name, args, NULL, &argLen);
 	if (args[argLen - 1] == ')') {
 		args[argLen - 1] = '\0';
-		printf("Name: '%s' Args: '%s'\n", name, args);
+		// printf("Name: '%s' Args: '%s'\n", name, args);
 	} else err(lnNmb, line, EXPECTED+2);
 	struct QCP_Node* fn = createNode(QCP_FUNC, list[1], "");
 	actualFunc = fn;
 	addChild(root, fn);
 }
 void endFuncCmd(char list[16][256]) {
-
+	// }
+	(void)list;
 }
 
 void intCmd(char list[16][256]) {
 	// int , y , = , 7;
-
+	(void)list;
 }
 
 QCP_Command cmds[] = {

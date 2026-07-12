@@ -1,7 +1,15 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#define LOGS 0
 #define MAX_LINE_SIZE 4096
+#define RST      "\033[0m"
+#define TEXT     "\033[0;38;5;244m"
+#define RED      "\033[1;38;5;160m"
+#define COMPLETE "\033[1;38;5;2m"
+#define ONGOING  "\033[0;38;5;220m"
+#define PL       "\033[1;38;5;130m"
+#define PLQ      "\033[1;38;5;206m"
 
 typedef enum {
 	QCP_ROOT, // 0

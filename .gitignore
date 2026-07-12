@@ -1,13 +1,9 @@
-**/bin/
-**/obj/
-**/.obj/
 **/build/
+**/.obj/
+**/obj/
+**/qcp_obj/
 **/*.sh
 **/*.kate-swp
 
-**/qcp_obj/
-
 program
 program.exe
-
-tests
