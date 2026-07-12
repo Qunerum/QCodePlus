@@ -55,7 +55,7 @@ int endCompiler() {
 		fclose(out);
 		free(root);
 		y("Compiling "QA""ONGOING" to "ASM""ONGOING"...");
-		if (system(os ? "./qasm \"qcp_obj/out.qa\" \"qcp_obj/out.asm\"" : "qasm.exe \"qcp_obj\\out.qa\" \"qcp_obj\\out.asm\"")) return r(QA" compilation error!");
+		if (system(os ? "./qasm \"qcp_obj/out.qa\" \"qcp_obj/out.asm\"" : "qasm.exe \"qcp_obj\\out.qa\" \"qcp_obj\\out.asm\"")) return r(QA""RED" compilation error!");
 		g(QA""COMPLETE" to "ASM""COMPLETE" compilation complete!");
 		y("Compiling "ASM""ONGOING" to "BIN""ONGOING"...");
 		if (system(os ? "nasm -f elf64 qcp_obj/out.asm -o qcp_obj/out.o" : "nasm -f elf64 qcp_obj\\out.asm -o qcp_obj\\out.o")) return r(ASM" compilation error!");
