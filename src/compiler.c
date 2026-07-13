@@ -26,7 +26,7 @@ struct QCP_Node* startCompiler() {
 	#endif
 	if (os <= -1) { r("Error! Unable to recognize operating system!"); return NULL; }
 	y("Starting compilation..."TEXT);
-	printf(TEXT" ██"RED"██"COMPLETE"██"ONGOING"██"PL"██"TEXT"\n");
+	printf(TEXT"<_/██"RED"██"COMPLETE"██"ONGOING"██"PL"██"PLQ"██"TEXT"\\_>\n");
 	if (system("nasm -v") != 0) { t("Error: NASM is not installed or not in the PATH!"); return NULL; }
 	y("Creating directory 'qcp_obj'...");
 	if (system(os ? "mkdir -p qcp_obj" : "if not exist qcp_obj mkdir qcp_obj")) { r("Error! Could not create directory 'obj'"); return NULL; }
@@ -42,12 +42,29 @@ struct QCP_Node* startCompiler() {
 	adda(0, "; dd - 4.294.967.295");
 	adda(0, "; dq - 18.446.744.073.709.551.615");
 	add(0, "");
+	adda(0, "; sm - start main");
+	adda(0, "; em - end main");
+	adda(0, "; step - function");
+	adda(0, "; es - end function");
+	adda(0, "; call - call");
+	adda(0, "; prt - print string");
+	adda(0, "; prtn - print number");
+	adda(0, "; prti - print int");
+	adda(0, "; prtln - print line");
+	adda(0, "; add - add int");
+	adda(0, "; sub - sub int");
+	adda(0, "; mul - mul int");
+	adda(0, "; div - div int");
+	add(0, "");
 	adda(0, "; QCode Plus v. 0.0.9");
 	add(0, "data");
+	add(1, ""); // global vars
 	add(0, "end");
 	add(0, "");
 	add(0, "sm");
+	add(1, ""); // main function
 	add(0, "em");
+	// other functions
 	return root;
 }
 int endCompiler() {
