@@ -4,7 +4,7 @@
 #include "codes.h"
 #include <stdio.h>
 extern int lnNmb, deep;
-int inString = 0;
+int inString = 0, inFunc = 0;
 char line[MAX_LINE_SIZE];
 extern struct QCP_Node* root;
 extern struct QCP_Node* actualFunc;
@@ -30,12 +30,15 @@ void funcCmd(char list[16][256]) {
 }
 void endFuncCmd(char list[16][256]) {
 	// }
+	actualFunc = NULL;
 	(void)list;
 }
 
 void intCmd(char list[16][256]) {
 	// int , y , = , 7;
-	(void)list;
+	if (!is(list[2], "=")) err(lnNmb, line, EXPECTED+6);
+	struct QCP_Node* fn = createNode(actualFunc ? QCP_LOCAL_INT : QCP_INT, list[1], list[3]);
+	addChild(actualFunc ? actualFunc : root, fn);
 }
 
 QCP_Command cmds[] = {

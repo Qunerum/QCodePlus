@@ -1,7 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#define LOGS 0
+#define LOGS 1
 #define MAX_LINE_SIZE 4096
 #define RST      "\033[0m"
 #define TEXT     "\033[0;38;5;244m"

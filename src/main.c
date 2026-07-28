@@ -12,10 +12,21 @@ void err(int line, const char* lineContent, int code) {
     if (code < QCP_ERROR_LIST) printf("%s\n"RST, qcp_error[code]); else printf("Unkown error code!\n"RST);
     exit(1);
 }
+static char* nodeTypeToText(QCP_Node_Type type) {
+    switch (type) {
+        case QCP_ROOT: return "Root";
+        case QCP_FUNC: return "Function";
+        case QCP_ARG: return "Argument";
+        case QCP_RETURN: return "Return";
+
+        case QCP_LOCAL_INT: return "Local int";
+        case QCP_INT: return "Int";
+    }
+}
 void printTree(struct QCP_Node* node, int depth) {
     if (node == NULL) return;
-    for (int i = 0; i < depth; i++) printf("  ");
-    printf("- Type: '%d', Name: '%s', Value: '%s'\n", node->type, node->name, node->value);
+    for (int i = 0; i < depth; i++) printf("   ");
+    printf("+ Type: '%s', Name: '%s', Value: '%s'\n", nodeTypeToText(node->type), node->name, node->value);
     printTree(node->child, depth + 1);
     printTree(node->next, depth);
 }
@@ -28,9 +39,9 @@ int main() {
     if (root == NULL) return 1;
     if (LOGS) printf("\n");
     char line[MAX_LINE_SIZE];
-    while (fgets(line, sizeof(line), in)) { madeLine(line); }
+    while (fgets(line, sizeof(line), in)) madeLine(line);
     fclose(in);
-    if (LOGS) { printTree(root, 0); printf("\n"); }
+    if (LOGS) { printf("\n"); printTree(root, 0); printf("\n"); }
     return endCompiler();
 }
 
