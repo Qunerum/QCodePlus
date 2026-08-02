@@ -2,8 +2,9 @@
 #include <stdlib.h>
 
 #define MAX_LINE 4096 + 1
-#define MAX_NAME 1024 + 1
+#define MAX_SUB 1024 + 1
 #define MAX_FUNC_LINES 2048
+#define MAX_ARGS 256
 
 void err(int i, char* text) { if (!i) return; printf("%s\n", text); exit(1); }
 
@@ -18,19 +19,64 @@ void mvL(char* t) {
 	if (l == 1) { t[0] = '\0'; return; }
 	for (int i = 1; i <= l; i++) t[i-1] = t[i];
 }
+void mvLbc(char* t, int cnt) { for (int i = 0; i < cnt; i++) mvL(t); }
 void cutL(char* t, char c) { while(t[0] == c) mvL(t); }
-void cpy(char* a, char* b) { int i = 0; while(a[i]) { b[i] = a[i]; i++; } }
-int is(char* a, char* b) { while(*a && *b) { a++; b++; if (*a != *b) return 0; } return 1; }
-int startWith(char* t, char* st) { while (*t && *st) { if (*t != *st) return 0; t++; st++; } return 1; }
-int fnd(char* t, char c) { int i = 0; while(t[i] != c) i++; return i; }
+void cpy(char* from, char* to) {
+	int i = 0;
+	while(from[i]) {
+		to[i] = from[i];
+		i++;
+	}
+}
+void cpyF(char* from, char* to, int cnt) {
+	for (int i = 0; i < cnt; i++) {
+		if (!from[i]) return;
+		to[i] = from[i];
+	}
+}
+int is(char* a, char* b) {
+	while(*a && *b) {
+		if (*a != *b) return 0;
+		a++;
+		b++;
+	}
+	return 1;
+}
+int startWith(char* t, char* st) {
+	while (*t && *st) {
+		if (*t != *st) return 0;
+		t++;
+		st++;
+	}
+	return 1;
+}
+int contains(char* t, char c) {
+	while(*t != '\0') {
+		if (*t == c) return 1;
+		t++;
+	}
+	return 0;
+}
+int fnd(char* t, char c) {
+	if (!contains(t, c)) return -1;
+	int i = 0;
+	while(t[i] != c) i++;
+	return i + 1;
+}
+int fndR(char* t, char c) {
+	if (!contains(t, c)) return -1;
+	int i = len(t) - 1;
+	while(t[i] != c && i > 0) i--;
+	return i;
+}
 
 typedef struct {
-	char name[MAX_NAME];
+	char name[MAX_SUB];
 } qcpVar;
 // ! = = = = = = = = = = FUNCTIONS = = = = = = = = = = !
 static int mainCreated = 1;
 typedef struct {
-	char name[MAX_NAME];
+	char name[MAX_SUB];
 	int lineCount;
 	char lines[MAX_FUNC_LINES][MAX_LINE];
 } qcpFunc;
@@ -50,13 +96,28 @@ void addLine(char* line) {
 	cpy(line, funcs[i].lines[funcs[i].lineCount]);
 	funcs[i].lineCount++;
 }
+// ! = = = = = = = = = = COMMANDS = = = = = = = = = = !
+typedef char _arg[MAX_ARGS][MAX_SUB];
+typedef struct { int isBlock; char* cmd; void (*handler)(_arg, int); int args; } qcpCmd;
+void qvFunc(_arg args, int argc) {
+	//
+}
+qcpCmd cmds[] = {
+	{0,"func", qvFunc, -1}
+};
+int cmdCount = sizeof(cmds) / sizeof(qcpCmd);
 // ! = = = = = = = = = = MAIN = = = = = = = = = = !
 #define LOG 1
 int main() {
 	FILE *file = fopen("program.qcp", "r");
 	if (!file) {
 		file = fopen("program.qcp", "w");
-		fprintf(file, "func main() {\n\tint num = 26;\n\tprint(\"Decimal: \" v:num 10 \"Binary (8): \" b:num.8 10 \"HEX (4): \" h:num.4 10);\n}\n");
+		fprintf(file, "func main() {\n");
+		fprintf(file, "\tint num(26);\n\n");
+		fprintf(file, "\tprintln(\"Decimal: \", v:num);\n");
+		fprintf(file, "\tprintln(\"Binary (8): \", b:num'8);\n");
+		fprintf(file, "\tprintln(\"HEX (4): \", h:num'4);\n");
+		fprintf(file, "}\n");
 		fclose(file);
 	}
 	file = fopen("program.qcp", "r");
@@ -69,13 +130,23 @@ int main() {
 		if (buffer[l - 1] == '\n') { buffer[l - 1] = '\0'; l--; }
 		cutL(buffer, ' ');
 		cutL(buffer, '\t');
-		printf("%i\n", fnd(buffer, ';'));
+		int ps = fnd(buffer, '('), pe = fndR(buffer, ')');
+		if (ps < 0 || pe < 0 || pe < ps) continue;
+		char argBfr[MAX_LINE];
+		_arg args = {0};
+		cpy(buffer, argBfr);
+		mvLbc(argBfr, ps);
+		pe = fndR(argBfr, ')');
+		argBfr[pe] = '\0';
+		printf("%s\n", argBfr);
+		for (int i = 0; i < cmdCount; i++) {
+			if (startWith(buffer, cmds[i].cmd)) {
+				//
+			}
+		}
 	}
 	fclose(file);
 	fclose(qasm);
-	createFunc("main");
-	addLine("int num = 26;");
-	addLine("print(\"Decimal: \" v:num 10 \"Binary (8): \" b:num,8 10 \"HEX (4): \" h:num,4 10);");
 	if (LOG) {
 		printf("FUNCS:\n");
 		for (int i = 0; i < funcCount; i++) {
