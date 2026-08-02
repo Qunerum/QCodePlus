@@ -21,7 +21,8 @@ void mvL(char* t) {
 void cutL(char* t, char c) { while(t[0] == c) mvL(t); }
 void cpy(char* a, char* b) { int i = 0; while(a[i]) { b[i] = a[i]; i++; } }
 int is(char* a, char* b) { while(*a && *b) { a++; b++; if (*a != *b) return 0; } return 1; }
-
+int startWith(char* t, char* st) { while (*t && *st) { if (*t != *st) return 0; t++; st++; } return 1; }
+int fnd(char* t, char c) { int i = 0; while(t[i] != c) i++; return i; }
 
 typedef struct {
 	char name[MAX_NAME];
@@ -55,7 +56,7 @@ int main() {
 	FILE *file = fopen("program.qcp", "r");
 	if (!file) {
 		file = fopen("program.qcp", "w");
-		fprintf(file, "func main() {\n\tint num = 26;\n\tprint(\"Decimal: \" v:num 10 \"Binary (8): \" b:num,8 10 \"HEX (4): \" h:num,4 10);\n}\n");
+		fprintf(file, "func main() {\n\tint num = 26;\n\tprint(\"Decimal: \" v:num 10 \"Binary (8): \" b:num.8 10 \"HEX (4): \" h:num.4 10);\n}\n");
 		fclose(file);
 	}
 	file = fopen("program.qcp", "r");
@@ -68,7 +69,7 @@ int main() {
 		if (buffer[l - 1] == '\n') { buffer[l - 1] = '\0'; l--; }
 		cutL(buffer, ' ');
 		cutL(buffer, '\t');
-		printf("%s\n", buffer);
+		printf("%i\n", fnd(buffer, ';'));
 	}
 	fclose(file);
 	fclose(qasm);

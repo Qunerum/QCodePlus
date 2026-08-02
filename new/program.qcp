@@ -1,4 +1,5 @@
 func main() {
 	int num = 26;
-	print("Decimal: " v:num 10 "Binary (8): " b:num,8 10 "HEX (4): " h:num,4 10);
+	print("Decimal: " v:num 10 "Binary (8): " b:num.8 10 "HEX (4): " h:num.4 10)
+	;
 }
