@@ -28,12 +28,15 @@ void cpy(char* from, char* to) {
 		to[i] = from[i];
 		i++;
 	}
+	to[i] = '\0';
 }
 void cpyF(char* from, char* to, int cnt) {
-	for (int i = 0; i < cnt; i++) {
+	int i = 0;
+	for (i = 0; i < cnt; i++) {
 		if (!from[i]) return;
 		to[i] = from[i];
 	}
+	to[i] = '\0';
 }
 int is(char* a, char* b) {
 	while(*a && *b) {
@@ -77,10 +80,12 @@ void split(_arg args, char* t, char c) {
 	printf("[");
 	while (contains(bfr, c)) {
 		int i = fnd(bfr, c);
-		cpyF(bfr, args[0], i);
+		cpyF(bfr, args[0], i-1);
 		mvLbc(bfr, i);
-		printf("'%s', ", args[0]);
+		printf("'\033[1;38;5;34m%s\033[0m', ", args[0]);
 	}
+	cpy(bfr, args[0]);
+	printf("'\033[1;38;5;34m%s\033[0m', ", args[0]);
 	printf("]\n");
 }
 
