@@ -9,6 +9,7 @@
 void err(int i, char* text) { if (!i) return; printf("%s\n", text); exit(1); }
 
 FILE *qasm;
+typedef char _arg[MAX_ARGS][MAX_SUB];
 int len(char* t) {
 	int x = 0;
 	while(t[x] != '\0') x++;
@@ -69,6 +70,19 @@ int fndR(char* t, char c) {
 	while(t[i] != c && i > 0) i--;
 	return i;
 }
+void split(_arg args, char* t, char c) {
+	if (!contains(t, c)) return;
+	char bfr[MAX_LINE];
+	cpy(t, bfr);
+	printf("[");
+	while (contains(bfr, c)) {
+		int i = fnd(bfr, c);
+		cpyF(bfr, args[0], i);
+		mvLbc(bfr, i);
+		printf("'%s', ", args[0]);
+	}
+	printf("]\n");
+}
 
 typedef struct {
 	char name[MAX_SUB];
@@ -97,7 +111,6 @@ void addLine(char* line) {
 	funcs[i].lineCount++;
 }
 // ! = = = = = = = = = = COMMANDS = = = = = = = = = = !
-typedef char _arg[MAX_ARGS][MAX_SUB];
 typedef struct { int isBlock; char* cmd; void (*handler)(_arg, int); int args; } qcpCmd;
 void qvFunc(_arg args, int argc) {
 	//
@@ -139,6 +152,7 @@ int main() {
 		pe = fndR(argBfr, ')');
 		argBfr[pe] = '\0';
 		printf("%s\n", argBfr);
+		split(args, argBfr, ',');
 		for (int i = 0; i < cmdCount; i++) {
 			if (startWith(buffer, cmds[i].cmd)) {
 				//
