@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define LOG 1
+
 #define MAX_LINE 4096 + 1
 #define MAX_SUB 1024 + 1
 #define MAX_FUNC_LINES 2048
@@ -22,7 +24,13 @@ void mvL(char* t) {
 }
 void mvLbc(char* t, int cnt) { for (int i = 0; i < cnt; i++) mvL(t); }
 void cutL(char* t, char c) { while(t[0] == c) mvL(t); }
-void cutR(char* t, char c) { int l = len(t) - 1; while(t[l] == c && l > 0) { mvL(t); l = len(t) - 1; } }
+void cutR(char* t, char c) {
+	int l = len(t) - 1;
+	while(t[l] == c && l > 0) {
+		mvL(t);
+		l = len(t) - 1;
+	}
+}
 void cpy(char* from, char* to) {
 	int i = 0;
 	while(from[i]) {
@@ -78,16 +86,13 @@ void trim(char* t, char c) {
 	cutL(t, c);
 	cutR(t, c);
 }
-
 void split(_arg args, int* argc, char* t, char c) {
 	char bfr[MAX_LINE];
 	cpy(t, bfr);
-	printf("[");
 	if (!contains(t, c)) {
 		cpy(t, args[0]);
 		trim(args[0], ' ');
-		if (argc) *argc = 1;
-		printf("'\033[1;38;5;34m%s\033[0m'] [%i]\n", args[0], *argc);
+		if (argc && len(args[0]) > 0) *argc = 1;
 		return;
 	}
 	if (argc) *argc = 1;
@@ -97,16 +102,11 @@ void split(_arg args, int* argc, char* t, char c) {
 		trim(args[0], ' ');
 		mvLbc(bfr, i);
 		if (argc) *argc = *argc + 1;
-		printf("'\033[1;38;5;34m%s\033[0m', ", args[0]);
 	}
 	cpy(bfr, args[0]);
 	trim(args[0], ' ');
-	printf("'\033[1;38;5;34m%s\033[0m'] [%i]\n", args[0], *argc);
 }
 
-typedef struct {
-	char name[MAX_SUB];
-} qcpVar;
 // ! = = = = = = = = = = FUNCTIONS = = = = = = = = = = !
 static int mainCreated = 1;
 typedef struct {
@@ -130,17 +130,45 @@ void addLine(char* line) {
 	cpy(line, funcs[i].lines[funcs[i].lineCount]);
 	funcs[i].lineCount++;
 }
+// ! = = = = = = = = = = VARS = = = = = = = = = = !
+#define type_int 0
+typedef struct {
+	char name[MAX_SUB];
+	int type;
+	float numVal;
+	char textVal[MAX_LINE];
+} qcpVar;
+qcpVar* vars;
+int varCount = 0;
+void createVar(char* name, int type, float num, char* text) {
+	qcpVar* new = realloc(vars, (varCount + 1) * sizeof(qcpVar));
+	err(!new, "Cannot add a variable!");
+	vars = new;
+	cpy(name, vars[varCount].name);
+	vars[varCount].type = type;
+	vars[varCount].numVal = num;
+	cpy(text, vars[varCount].textVal);
+}
 // ! = = = = = = = = = = COMMANDS = = = = = = = = = = !
-typedef struct { int isBlock; char* cmd; void (*handler)(_arg, int); int args; } qcpCmd;
-void qvFunc(_arg args, int argc) {
+typedef struct { int isBlock; char* cmd; void (*handler)(char*, _arg, int); int args; } qcpCmd;
+void qvFunc(char* name, _arg args, int argc) {
+	//
+}
+void qvInt(char* name, _arg args, int argc) {
+	printf("Creating int with value: %s\n", args[0]);
+}
+
+void qvPrintln(char* name, _arg args, int argc) {
 	//
 }
 qcpCmd cmds[] = {
-	{0,"func", qvFunc, -1}
+	{1,"func", qvFunc, -1},
+	{0,"int", qvInt, 1},
+
+	{0,"println", qvPrintln, -1}
 };
 int cmdCount = sizeof(cmds) / sizeof(qcpCmd);
 // ! = = = = = = = = = = MAIN = = = = = = = = = = !
-#define LOG 1
 int main() {
 	FILE *file = fopen("program.qcp", "r");
 	if (!file) {
@@ -154,7 +182,7 @@ int main() {
 		fclose(file);
 	}
 	file = fopen("program.qcp", "r");
-	if (!file) { printf("Failed to open qcp file!\n"); return 1; }
+	err(!file, "Failed to open qcp file!\n");
 	qasm = fopen(".obj/out.qa", "w");
 	char buffer[MAX_LINE];
 	while (fgets(buffer, sizeof(buffer), file) != NULL) {
@@ -171,12 +199,24 @@ int main() {
 		mvLbc(argBfr, ps);
 		pe = fndR(argBfr, ')');
 		argBfr[pe] = '\0';
-		// printf("%s\n", argBfr);
 		int argc = 0;
 		split(args, &argc, argBfr, ',');
 		for (int i = 0; i < cmdCount; i++) {
 			if (startWith(buffer, cmds[i].cmd)) {
-				//
+				if (LOG) printf("cmd: '%s'\n", cmds[i].cmd);
+				char r = ';';
+				if (cmds[i].isBlock) r = '{';
+				err(buffer[len(buffer) - 1] != r, "You need ';' or '{'!");
+				int cl = len(cmds[i].cmd);
+				mvLbc(buffer, cl);
+				int s = fnd(buffer, '(');
+				err(s < 0, "Error");
+				buffer[s-1] = '\0';
+				cutL(buffer, ' ');
+				if (LOG) printf("    Name: '%s'\n", buffer);
+				if (LOG) printf("    Req argC: %i\n", cmds[i].args);
+				if (LOG) printf("    Args: '%s' [%i]\n", argBfr, argc);
+				cmds[i].handler(buffer, args, argc);
 			}
 		}
 	}
