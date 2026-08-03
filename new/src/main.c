@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -11,6 +12,16 @@
 void err(int i, char* text) { if (!i) return; printf("%s\n", text); exit(1); }
 
 FILE *qasm;
+void add(int t, const char* format, ...) {
+	if (!qasm) return;
+	va_list args;
+	va_start(args, format);
+	if (t) fprintf(qasm, "\t");
+	vfprintf(qasm, format, args);
+	fprintf(qasm, "\n");
+	va_end(args);
+}
+
 typedef char _arg[MAX_ARGS][MAX_SUB];
 int len(char* t) {
 	int x = 0;
@@ -108,7 +119,7 @@ void split(_arg args, int* argc, char* t, char c) {
 }
 
 // ! = = = = = = = = = = FUNCTIONS = = = = = = = = = = !
-static int mainCreated = 1;
+int mainCreated = 0;
 typedef struct {
 	char name[MAX_SUB];
 	int lineCount;
@@ -132,32 +143,27 @@ void addLine(char* line) {
 }
 // ! = = = = = = = = = = VARS = = = = = = = = = = !
 #define type_int 0
-typedef struct {
-	char name[MAX_SUB];
-	int type;
-	float numVal;
-	char textVal[MAX_LINE];
-} qcpVar;
+typedef struct { char name[MAX_SUB]; int type; } qcpVar;
 qcpVar* vars;
 int varCount = 0;
-void createVar(char* name, int type, float num, char* text) {
+void createVar(char* name, int type, char* value) {
 	qcpVar* new = realloc(vars, (varCount + 1) * sizeof(qcpVar));
 	err(!new, "Cannot add a variable!");
 	vars = new;
 	cpy(name, vars[varCount].name);
 	vars[varCount].type = type;
-	vars[varCount].numVal = num;
-	cpy(text, vars[varCount].textVal);
+	// value
 }
 // ! = = = = = = = = = = COMMANDS = = = = = = = = = = !
 typedef struct { int isBlock; char* cmd; void (*handler)(char*, _arg, int); int args; } qcpCmd;
 void qvFunc(char* name, _arg args, int argc) {
-	//
+	createFunc(name);
 }
+// = = = Variables
 void qvInt(char* name, _arg args, int argc) {
 	printf("Creating int with value: %s\n", args[0]);
 }
-
+// = = = Commands
 void qvPrintln(char* name, _arg args, int argc) {
 	//
 }
@@ -184,6 +190,37 @@ int main() {
 	file = fopen("program.qcp", "r");
 	err(!file, "Failed to open qcp file!\n");
 	qasm = fopen(".obj/out.qa", "w");
+	add(0,". ; db - 255 - 8B");
+	add(0,". ; dw - 65.535 - 16B");
+	add(0,". ; dd - 4.294.967.295 - 32B");
+	add(0,". ; dq - 18.446.744.073.709.551.615 - 64B\n");
+	add(0,". ; sm - start main");
+	add(0,". ; em - end main");
+	add(0,". ; step - function");
+	add(0,". ; es - end func");
+	add(0,". ; call - call");
+	add(0,". ; prt - print text");
+	add(0,". ; prtn - print num");
+	add(0,". ; prtnb - print num binary");
+	add(0,". ; prtnh - print num hex");
+	add(0,". ; prti - print int");
+	add(0,". ; prtib - print int binary");
+	add(0,". ; prtih - print int hex");
+	add(0,". ; prtln - print line\n");
+	add(0,". ; add - add num to int");
+	add(0,". ; addi - add int to int");
+	add(0,". ; sub - sub num from int");
+	add(0,". ; subi - sub int from int");
+	add(0,". ; mul - mul num by int");
+	add(0,". ; muli - mul int by int");
+	add(0,". ; div - div int by num");
+	add(0,". ; divi - div int by int\n");
+	add(0,". ; . - write in assembler");
+	add(0,". ; .t - write in assembler with tab\n");
+	add(0,"data");
+	add(0,"end");
+	add(0,"");
+	add(0,"");
 	char buffer[MAX_LINE];
 	while (fgets(buffer, sizeof(buffer), file) != NULL) {
 		if (buffer[0] == '\n' || buffer[0] == '\0') continue;
@@ -228,6 +265,7 @@ int main() {
 			printf("- %s:\n", funcs[i].name);
 			for (int l = 0; l < funcs[i].lineCount; l++) printf("---|%s\n", funcs[i].lines[l]);
 		}
+		printf("\n");
 	}
 	if (!mainCreated) return 1;
 	return 0;
