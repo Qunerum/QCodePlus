@@ -22,6 +22,7 @@ void mvL(char* t) {
 }
 void mvLbc(char* t, int cnt) { for (int i = 0; i < cnt; i++) mvL(t); }
 void cutL(char* t, char c) { while(t[0] == c) mvL(t); }
+void cutR(char* t, char c) { int l = len(t) - 1; while(t[l] == c && l > 0) { mvL(t); l = len(t) - 1; } }
 void cpy(char* from, char* to) {
 	int i = 0;
 	while(from[i]) {
@@ -73,20 +74,34 @@ int fndR(char* t, char c) {
 	while(t[i] != c && i > 0) i--;
 	return i;
 }
-void split(_arg args, char* t, char c) {
-	if (!contains(t, c)) return;
+void trim(char* t, char c) {
+	cutL(t, c);
+	cutR(t, c);
+}
+
+void split(_arg args, int* argc, char* t, char c) {
 	char bfr[MAX_LINE];
 	cpy(t, bfr);
 	printf("[");
+	if (!contains(t, c)) {
+		cpy(t, args[0]);
+		trim(args[0], ' ');
+		if (argc) *argc = 1;
+		printf("'\033[1;38;5;34m%s\033[0m'] [%i]\n", args[0], *argc);
+		return;
+	}
+	if (argc) *argc = 1;
 	while (contains(bfr, c)) {
 		int i = fnd(bfr, c);
 		cpyF(bfr, args[0], i-1);
+		trim(args[0], ' ');
 		mvLbc(bfr, i);
+		if (argc) *argc = *argc + 1;
 		printf("'\033[1;38;5;34m%s\033[0m', ", args[0]);
 	}
 	cpy(bfr, args[0]);
-	printf("'\033[1;38;5;34m%s\033[0m', ", args[0]);
-	printf("]\n");
+	trim(args[0], ' ');
+	printf("'\033[1;38;5;34m%s\033[0m'] [%i]\n", args[0], *argc);
 }
 
 typedef struct {
@@ -156,8 +171,9 @@ int main() {
 		mvLbc(argBfr, ps);
 		pe = fndR(argBfr, ')');
 		argBfr[pe] = '\0';
-		printf("%s\n", argBfr);
-		split(args, argBfr, ',');
+		// printf("%s\n", argBfr);
+		int argc = 0;
+		split(args, &argc, argBfr, ',');
 		for (int i = 0; i < cmdCount; i++) {
 			if (startWith(buffer, cmds[i].cmd)) {
 				//
