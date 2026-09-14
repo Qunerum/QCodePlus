@@ -1,63 +1,26 @@
+#include "string.h"
+#include "types.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include "main.h"
-#include "tools.h"
-#include "parser.h"
-#include "compiler.h"
-#include "errors.h"
 
-void err(int line, const char* lineContent, int code) {
-    printf(RED"[QCP Compiler] SYNTAX ERROR [%03d] at line %d:\n", code, line);
-    printf("  %d | %s\n", line, lineContent);
-    if (code < QCP_ERROR_LIST) printf("%s\n"RST, qcp_error[code]); else printf("Unkown error code!\n"RST);
-    exit(1);
-}
-static char* nodeTypeToText(QCP_Node_Type type) {
-    switch (type) {
-        case QCP_ROOT: return "Root";
-        case QCP_FUNC: return "Function";
-        case QCP_ARG: return "Argument";
-        case QCP_RETURN: return "Return";
 
-        case QCP_LOCAL_INT: return "Local int";
-        case QCP_INT: return "Int";
-    }
-}
-void printTree(struct QCP_Node* node, int depth) {
-    if (node == NULL) return;
-    for (int i = 0; i < depth; i++) printf("   ");
-    printf("+ Type: '%s', Name: '%s', Value: '%s'\n", nodeTypeToText(node->type), node->name, node->value);
-    printTree(node->child, depth + 1);
-    printTree(node->next, depth);
-}
-char* fileIn;
+
+const qcpc cmds[] = {
+	{"int", }
+};
+const uint cmdCnt = sizeof(cmds) / sizeof(qcpc);
 int main() {
-    fileIn = "program.qcp";
-    FILE* in = fopen(fileIn, "r");
-    if (!in) { printf("Cannot open the file!\n"); return 1; }
-    struct QCP_Node* root = startCompiler();
-    if (root == NULL) return 1;
-    if (LOGS) printf("\n");
-    char line[MAX_LINE_SIZE];
-    while (fgets(line, sizeof(line), in)) madeLine(line);
-    fclose(in);
-    if (LOGS) { printf("\n"); printTree(root, 0); printf("\n"); }
-    return endCompiler();
-}
+	FILE *in = fopen("program.qcp", "r");
+	if (!in) return 1;
+	char l[4097];
+	while (fgets(l, sizeof(l), in)) {
+		for (uint i = 0; i < cmdCnt; i++) {
+			if (strStartWith(l, cmds[i].name)) {
+				uint nameL = strLen(cmds[i].name);
+				strShiftLeft(l, sizeof(l), nameL);
+				printf("%s\n", l);
+			}
+		}
+	}
 
-struct QCP_Node* createNode(QCP_Node_Type type, char* name, char* value) {
-    struct QCP_Node* newNode = malloc(sizeof(struct QCP_Node));
-    newNode->type = type;
-    copy(name, newNode->name);
-    copy(value, newNode->value);
-    newNode->child = NULL;
-    newNode->next = NULL;
-    return newNode;
-}
-void addChild(struct QCP_Node* parent, struct QCP_Node* newChild) {
-    if (parent->child == NULL) parent->child = newChild; else {
-        struct QCP_Node* temp = parent->child;
-        while (temp->next != NULL) temp = temp->next;
-        temp->next = newChild;
-    }
+	return 0;
 }

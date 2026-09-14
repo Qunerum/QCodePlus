@@ -5,7 +5,7 @@ CFLAGS = -Wall -Wextra -O2 -Iinclude
 LDFLAGS_WIN = -static -static-libgcc -static-libstdc++
 
 SRC_DIR = src
-OBJ = obj
+OBJ = .obj
 BUILD_DIR = build
 
 GET_OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ)/$(PLATFORM)/%.o, $(wildcard $(SRC_DIR)/*.c))

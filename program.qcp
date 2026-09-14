@@ -1,15 +1,17 @@
-int x = 15;
+int(x, 10);
 
 func main() {
-	int y = 7;
-	int z = 2;
-	x += y;
-	x += z;
-	test();
-}
+	int(num, 26);
 
+	println("Decimal: ", v:num);
+	println("Binary (8): ", b:num'8);
+	test();
+	println("HEX (4): ", h:num'4);
+}
 func test() {
-	int a = 13;
-	print("Hello, World!" 10 v:a);
-	// Hello, World!
+	int(num, 6);
+	if(num, ==, 6, hello, num);
+}
+func hello(int a) {
+	println(v:a);
 }
