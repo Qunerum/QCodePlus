@@ -10,8 +10,7 @@ func main() {
 }
 func test() {
 	int(num, 6);
-	if(num, ==, 6, hello, num);
-}
-func hello(int a) {
-	println(v:a);
+	if(num == 6) {
+		println(v:num);
+	}
 }

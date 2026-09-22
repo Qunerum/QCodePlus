@@ -12,6 +12,7 @@ default rel
 	mov rax, [rsp + (%1 * 8)]
 	mov [rel qcpi%2], rax
 %endmacro
+
 %macro goto 2
 	lea rax, [rel .b%1]
 	mov [rel qcpf], rax
@@ -31,6 +32,25 @@ default rel
 	pop [rel qcpf]
 	jmp [rel qcpf]
 %endmacro
+
+; je ==
+; jne !=
+; jl <
+; jle <=
+; jg >
+; jge >=
+%macro if 3
+	mov rax, %1
+	mov rbx, %3
+	cmp rax, rbx
+	%ifidn %2, ==
+		jne .siema
+	%endif
+%endmacro
+%macro endif 0
+
+%endmacro
+
 
 section .data
 	qcpia dq 0
@@ -193,9 +213,15 @@ main:       ; func main() {
 
 test:
 	qpush 6 ; int num(6);
+	; if(num == 6) {
+	;     println(v:num);
+	; }
+	if [rel qcpia] == 6
 	; println(v:num);
 	qet 0, a
 	call intToText
 	call prt
 	call prtln
+	endif
+
 	endf
