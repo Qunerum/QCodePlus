@@ -5,7 +5,7 @@ func main() {
 
 	println("Decimal: ", v:num);
 	println("Binary (8): ", b:num'8);
-	test();
+	@test();
 	println("HEX (4): ", h:num'4);
 }
 func test() {

@@ -1,15 +1,11 @@
-// ERRORS:  Ignore line , stop compiler
-// 0x0001 - false , true - var not exists
-// 0x0002 - true , false - cannot change var (is perm) 
-
 int(x, 10); // creating global int (can change)
 perm int(y, 20); // creating global permament int (can't change)
 
 func main() {
 	int(num, 26); // creating local int
-  set(x, 32); // sets int x to 32
-  set(y, 5); // ERROR 0x0002
-  set(z, 20); // ERROR 0x0001
+	set(x, 32); // sets int x to 32
+	set(y, 5); // ERROR 0x0002
+	set(z, 20); // ERROR 0x0001
 	println("Decimal: ", v:num);
 	println("Binary (8): ", b:num'8);
 	test();
@@ -21,17 +17,17 @@ func test() {
 		println(v:num);
 	}
 
-  bool8(test, false);
-  // false - 00000000
-  // true - 11111111
-  // ........
-  setb(test, 0, true);
-  println("Bool value: ", test); // Bool value: 00000001
-  setb(test, 5, true);
-  println("Bool value: ", test); // Bool value: 00100001
-  if(test'5) {
-    println("This is working!");
-  }
-  neg(test, all);
-  println("Bool value: ", test); // Bool value: 11011110
+	bool8(test, false);
+	// false - 00000000
+	// true - 11111111
+	// ........
+	setb(test, 0, true);
+	println("Bool value: ", test); // Bool value: 00000001
+	setb(test, 5, true);
+	println("Bool value: ", test); // Bool value: 00100001
+	if(test'5) {
+		println("This is working!");
+	}
+	neg(test, all);
+	println("Bool value: ", test); // Bool value: 11011110
 }

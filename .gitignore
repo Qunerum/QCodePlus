@@ -1,9 +1,8 @@
 **/build/
 **/.obj/
 **/obj/
-**/qcp_obj/
 **/*.sh
 **/*.kate-swp
+**/*.o
 
-program
-program.exe
+out.c
