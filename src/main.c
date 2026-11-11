@@ -89,9 +89,10 @@ uint parseToSingleArgv(const char* line, const char* cmdName, char argv_buf[MAX_
 }
 
 int main(int argc, char **argv) {
-	FILE *in = fopen("program.qcp", "r");
+	if (argc <= 2) return 1;
+	FILE *in = fopen(argv[1], "r");
 	if (!in) return 1;
-	FILE *out = fopen("out.c", "w");
+	FILE *out = fopen(argv[2], "w");
 	if (!out) {
 		fclose(in);
 		return 1;
