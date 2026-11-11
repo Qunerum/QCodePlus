@@ -22,10 +22,4 @@ typedef uint8 state;
 
 typedef unsigned int uint;
 
-typedef struct {
-	char name[64];
-
-} qcpc;
-
-
 #endif

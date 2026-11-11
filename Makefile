@@ -21,6 +21,7 @@ else
 endif
 
 TARGET = $(BUILD_DIR)/qcodeplus$(EXT)
+TARGET_ARGS = "program.qcp" "out.c"
 
 all: linux win
 
@@ -44,7 +45,7 @@ $(TARGET): $(OBJS)
 run: all
 	@clear
 	@echo "--- Running on $(PLATFORM) ---"
-	@./$(TARGET)
+	@./$(TARGET) $(TARGET_ARGS)
 
 clean:
 	@rm -rf $(OBJ) $(BUILD_DIR)
