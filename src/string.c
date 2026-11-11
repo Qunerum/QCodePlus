@@ -229,49 +229,30 @@ void strConvert(char* buf, const uint size, const char* format, ...) {
 	strConvertV(buf, size, format, args);
 	va_end(args);
 }
+void strReplace(char* str, const uint size, const char* search, const char* replaceWith) {
+	if (!str || size == 0) return;
+	if (!search || *search == '\0') return;
+	if (!replaceWith) replaceWith = "";
+	uint searchLen = strLen(search), replaceLen = strLen(replaceWith), i = 0;
+	int diff = (int)replaceLen - (int)searchLen;
+	while (str[i] != '\0') {
+		if (strStartWith(&str[i], search)) {
+			if (diff > 0) strShiftRight(&str[i], size - i, diff);
+			else if (diff < 0) strCopy(&str[i + replaceLen], &str[i + searchLen]);
+			for (uint j = 0; j < replaceLen; j++) if (i + j < size - 1) str[i + j] = replaceWith[j];
+			i += replaceLen;
+		} else i++;
+	}
+}
 
-uint stringTest() {
-	uint x = 0;
-	x += strLen("Hello, World!") == 13;
-	x += strIs("Hello", "Hello") && !strIs("Hello", "World");
-	char temp[16];
-	strCopy(temp, "This is Qunetra");
-	x += strIs(temp, "This is Qunetra");
-	strShiftRight(temp, 16, 5);
-	x += strIs(temp, "     This is Qu");
-	strShiftLeft(temp, 16, 7);
-	x += strIs(temp, "is is Qu");
-	x += strStartWith(temp, "is is");
-	x += strEndWith(temp, "s Qu");
-	x += strContains(temp, "is Q");
-	x += strFind(temp, 'Q') == 6;
-	strUpper(temp);
-	x += strIs(temp, "IS IS QU");
-	strLower(temp);
-	x += strIs(temp, "is is qu");
-	strCopy(temp, ".. \tQunetra\n ..");
-	strTrimStartChar(temp, '.');
-	x += strIs(temp, " \tQunetra\n ..");
-	strTrimEndChar(temp, '.');
-	x += strIs(temp, " \tQunetra\n ");
-	strTrimStart(temp);
-	x += strIs(temp, "Qunetra\n ");
-	strTrimEnd(temp);
-	x += strIs(temp, "Qunetra");
-	strCopy(temp, " \t. Qunetra..\r\n");
-	strTrim(temp);
-	x += strIs(temp, ". Qunetra..");
-	uint i = 11;
-	strAddChar(temp, 16, &i, 'a');
-	x += strIs(temp, ". Qunetra..a");
-	strAddStr(temp, 16, &i, "test");
-	x += strIs(temp, ". Qunetra..ates");
-	i = 0;
-	strAddNum(temp, 16, &i, 23, 2);
-	strAddNum(temp, 16, &i, 23, 10);
-	strAddNum(temp, 16, &i, 23, 16);
-	x += strIs(temp, "101112317");
-	strConvert(temp, 16, "%s%c%d%u%x%X%%%t", "xD", 'd', 12, -5, 13, 14);
-	x += strIs(temp, "xDd125dE%%t");
-	return x;
+int strToInt(const char* s) {
+	if (!s) return 0;
+	int v = 0;
+	const state isN = *s == '-';
+	if (isN) s++;
+	while (*s) {
+		v = v * 10 + (*s - '0');
+		s++;
+	}
+	return isN ? -v : v;
 }

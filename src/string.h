@@ -23,8 +23,6 @@ void strAddChar(char* buffer, const uint size, uint *index, const char c);
 void strAddStr(char* buffer, const uint size, uint *index, const char* str);
 void strAddNum(char* buffor, const uint size,  uint* index, int value, const uint8 base);
 void strConvert(char* buf, const uint size, const char* format, ...);
-
-// X - 5
-uint stringTest();
+void strReplace(char* str, const uint size, const char* search, const char* replaceWith);
 
 #endif

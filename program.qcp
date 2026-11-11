@@ -4,13 +4,15 @@ func main() {
 	int num(26);
 
 	println("Decimal: ", v:num);
-	println("Binary (8): ", b:num'8);
+	println("BIN (8): ", b:num'8);
 	@ test();
-	println("HEX (4): ", h:num'4);
+	println("hex (4): ", h:num'4);
+	println("HEX (5): ", H:num'5);
+	println("OCT (6): ", o:num'6);
 }
 func test() {
 	int num(6);
-	if(num == 6) {
-		println(v:num);
+	if (num == 6) {
+		println("Num is: ", v:num);
 	}
 }

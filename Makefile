@@ -36,11 +36,11 @@ build_platform:
 
 $(OBJ)/$(PLATFORM)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(TARGET_CC) $(CFLAGS) -c $< -o $@
+	@$(TARGET_CC) $(CFLAGS) -c $< -o $@
 
 $(TARGET): $(OBJS)
 	@mkdir -p $(BUILD_DIR)
-	$(TARGET_CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
+	@$(TARGET_CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
 run: all
 	@clear

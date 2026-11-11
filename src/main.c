@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_LINE 4096
+#define MAX_LINE 2048
 #define MAX_ARGS 64
 
 typedef void (*qcp_handler_t)(uint argc, char argv[MAX_ARGS][MAX_LINE]);
@@ -11,21 +11,85 @@ typedef struct {
 	const char* name;
 	qcp_handler_t handler;
 } qcpc;
+FILE *out = 0;
+uint d = 0;
+#define __cmd(name) static void _qcp_##name(uint argc, char argv[MAX_ARGS][MAX_LINE])
+#define _cmd(name) {#name, _qcp_##name}
+#define _add(line, ...) { for(uint i = 0; i < d; i++) fputc('\t', out); fprintf(out, line"\n", ##__VA_ARGS__); }
+#define _chk(c) strStartWith(argv[i], #c":")
+#define _ic_ (void)argc;
+#define _iv_ (void)argv;
+#define _ib_ (void)argc; (void)argv;
 
-
-
-void _qcp_func(uint argc, char argv[MAX_ARGS][MAX_LINE]) {
-	printf("[HANDLER] %s -> Name: '%s'\n", argv[0], argv[1]);
-	for (uint i = 2; i < argc; i++) printf(">   arg[%u] = '%s'\n", i, argv[i]);
-	putchar('\n');
+state isNum(const char* s) {
+	while (*s) {
+		if (*s < '0' && *s > '9') return false;
+		s++;
+	}
+	return true;
 }
 
+__cmd(int) { _ic_ _add("int %s = %s;", argv[1], argv[2]) }
+__cmd(func) { _ic_
+	if (strIs(argv[1], "main")) _add("int %s() {", argv[1])
+	else _add("void %s() {", argv[1])
+	d++;
+}
+__cmd(end) { _ib_
+	if (d > 0) d--;
+	_add("}")
+}
+__cmd(run) { _ic_
+	_add("extern void %s();", argv[1]);
+	_add("%s();", argv[1])
+}
+__cmd(if) { _ic_
+	_add("if (%s) {", argv[2])
+	d++;
+}
+static void _pv_add(char* s, const uint len, char* c, const uint sc, char* a, const uint sa, uint* ci, uint* ai, const char m) {
+	strShiftLeft(s, len, 2);
+	const int j = strFind(s, '\'');
+	strAddChar(c, sc, ci, '%');
+	if (j > 0) {
+		s[j] = '\0';
+		strAddChar(c, sc, ci, '0');
+		strAddStr(c, sc, ci, s + j + 1);
+	}
+	strAddChar(c, sc, ci, m);
+	strAddStr(a, sa, ai, ", ");
+	strAddStr(a, sa, ai, s);
+}
+__cmd(println) {
+	char c[MAX_LINE], a[MAX_LINE];
+	uint ci = 0, ai = 0;
+	for (uint i = 2; i < argc; i++) {
+		const uint len = strLen(argv[i]) + 1;
+		if (argv[i][0] == '"') {
+			strShiftRight(argv[i], len, 1);
+			strShiftLeft(argv[i], len, 2);
+			strReplace(argv[i], sizeof(argv[i]), "%", "%%");
+			strAddStr(c, sizeof(c), &ci, argv[i]);
+		} else if (_chk(v)) {
+			strShiftLeft(argv[i], len, 2);
+			strAddStr(c, sizeof(c), &ci, "%i");
+			strAddStr(a, sizeof(a), &ai, ", ");
+			strAddStr(a, sizeof(a), &ai, argv[i]);
+		}
+		else if (_chk(b)) _pv_add(argv[i], len, c, sizeof(c), a, sizeof(a), &ci, &ai, 'b');
+		else if (_chk(h)) _pv_add(argv[i], len, c, sizeof(c), a, sizeof(a), &ci, &ai, 'x');
+		else if (_chk(H)) _pv_add(argv[i], len, c, sizeof(c), a, sizeof(a), &ci, &ai, 'X');
+		else if (_chk(o)) _pv_add(argv[i], len, c, sizeof(c), a, sizeof(a), &ci, &ai, 'o');
+	}
+	_add("printf(\"%s\" \"\\n\"%s);", c, a)
+}
 const qcpc cmds[] = {
-	{"int", _qcp_func},
-	{"func", _qcp_func},
-	{"@", _qcp_func},
-	{"if", _qcp_func},
-	{"println", _qcp_func}
+	_cmd(int),
+	_cmd(func),
+	{"}",_qcp_end},
+	{"@",_qcp_run},
+	_cmd(if),
+	_cmd(println)
 };
 const uint cmdCnt = sizeof(cmds) / sizeof(qcpc);
 
@@ -92,11 +156,12 @@ int main(int argc, char **argv) {
 	if (argc <= 2) return 1;
 	FILE *in = fopen(argv[1], "r");
 	if (!in) return 1;
-	FILE *out = fopen(argv[2], "w");
+	out = fopen(argv[2], "w");
 	if (!out) {
 		fclose(in);
 		return 1;
 	}
+	_add("#include <stdio.h>")
 	char arg_slots[MAX_ARGS][MAX_LINE];
 	uint qargc = 0;
 	char l[MAX_LINE];
@@ -105,10 +170,7 @@ int main(int argc, char **argv) {
 		for (uint i = 0; i < cmdCnt; i++) {
 			if (strStartWith(l, cmds[i].name)) {
 				parseToSingleArgv(l, cmds[i].name, arg_slots, &qargc);
-				if (cmds[i].handler != NULL) {
-					printf("%s\n", l);
-					cmds[i].handler(qargc, arg_slots);
-				}
+				if (cmds[i].handler != NULL) cmds[i].handler(qargc, arg_slots);
 			}
 		}
 	}
