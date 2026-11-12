@@ -233,8 +233,10 @@ void strReplace(char* str, const uint size, const char* search, const char* repl
 	if (!str || size == 0) return;
 	if (!search || *search == '\0') return;
 	if (!replaceWith) replaceWith = "";
-	uint searchLen = strLen(search), replaceLen = strLen(replaceWith), i = 0;
-	int diff = (int)replaceLen - (int)searchLen;
+	if (!strContains(str, search)) return;
+	const uint searchLen = strLen(search), replaceLen = strLen(replaceWith);
+	const int diff = (int)replaceLen - (int)searchLen;
+	uint i = 0;
 	while (str[i] != '\0') {
 		if (strStartWith(&str[i], search)) {
 			if (diff > 0) strShiftRight(&str[i], size - i, diff);
@@ -244,7 +246,6 @@ void strReplace(char* str, const uint size, const char* search, const char* repl
 		} else i++;
 	}
 }
-
 int strToInt(const char* s) {
 	if (!s) return 0;
 	int v = 0;

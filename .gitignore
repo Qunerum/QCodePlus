@@ -4,6 +4,3 @@
 **/*.sh
 **/*.kate-swp
 **/*.o
-
-out.c
-out

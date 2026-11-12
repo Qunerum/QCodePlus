@@ -1,18 +1,19 @@
-int x(10);
+int x(10)
 
 func main() {
-	int num(26);
+	int num(18 + 3)
+	perm int(y, 37)
+	uint tet(200)
 
-	println("Decimal: ", v:num);
-	println("BIN (8): ", b:num'8);
-	@ test();
-	println("hex (4): ", h:num'4);
-	println("HEX (5): ", H:num'5);
-	println("OCT (6): ", o:num'6);
+	set num(10)
+
+	@ test()
+	@ test()
 }
 func test() {
-	int num(6);
+	int num(6)
 	if (num == 6) {
-		println("Num is: ", v:num);
+		print("Num is: ")
+		println(i:num, "!")
 	}
 }
