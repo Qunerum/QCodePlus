@@ -24,5 +24,6 @@ void strAddStr(char* buffer, const uint size, uint *index, const char* str);
 void strAddNum(char* buffor, const uint size,  uint* index, int value, const uint8 base);
 void strConvert(char* buf, const uint size, const char* format, ...);
 void strReplace(char* str, const uint size, const char* search, const char* replaceWith);
+state isNum(const char* s);
 
 #endif

@@ -1,19 +1,17 @@
-int x(10)
+int x(0)
 
 func main() {
-	int num(18 + 3)
-	perm int(y, 37)
-	uint tet(200)
-
-	set num(10)
-
+	for (i, 10) {
+		println(i:i)
+		add x(2)
+	}
 	@ test()
+	rep (10) {
+		add x(1)
+	}
 	@ test()
 }
 func test() {
-	int num(6)
-	if (num == 6) {
-		print("Num is: ")
-		println(i:num, "!")
-	}
+	print("Num is: ")
+	println(i:x)
 }

@@ -257,3 +257,10 @@ int strToInt(const char* s) {
 	}
 	return isN ? -v : v;
 }
+state isNum(const char* s) {
+	while (*s) {
+		if (*s < '0' || *s > '9') return false;
+		s++;
+	}
+	return true;
+}
