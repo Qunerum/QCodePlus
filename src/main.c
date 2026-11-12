@@ -9,7 +9,8 @@ FILE *out = 0;
 state
 	rio = false, // remove stdio
 	mir = false, // make it readable
-	rac = false; // run after compilation
+	rac = false, // run after compilation
+	rcf = false; // remove C file
 
 uint parseToSingleArgv(const char* line, const char* cmdName, char argv_buf[MAX_ARGS][MAX_LINE], uint* out_argc) {
 	*out_argc = 0;
@@ -88,6 +89,7 @@ int main(int argc, char **argv) {
 		else _chkf(rio)
 		else _chkf(mir)
 		else _chkf(rac)
+		else _chkf(rcf)
 	}
 	if (!inp) return 2;
 	const char *lastSlash = strrchr(inp, '/');
@@ -141,6 +143,7 @@ int main(int argc, char **argv) {
 	snprintf(cmd, sizeof(cmd), "%s \"%s\" -o \"%s\"", ccp, oPath, ePath);
 	const int tf = system(cmd) == 0;
 	if (!(to && tf)) return 5;
+	if (rcf) remove(cPath);
 	if (rac) {
 		char run_cmd[MAX_LINE + 64];
 		snprintf(run_cmd, sizeof(run_cmd), "./%s", ePath);
