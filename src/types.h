@@ -34,13 +34,16 @@ extern state
 	rio, // remove stdio
 	mir, // make it readable
 	rac; // run after compilation
-
+void errorHandler(const char* cmd, const char* usage);
 #define __cmd(name) static void _qcp_##name(uint argc, char argv[MAX_ARGS][MAX_LINE])
+#define __te(state, usage) { if (state) errorHandler(argv[0], usage); }
+#define __cu(minA, maxA, usage) { if(argc < minA + 2 || argc > maxA + 2) errorHandler(argv[0], usage); }
+
 #define _cmd(name) {#name, _qcp_##name}
-#define _add(line, ...) { if (mir) { \
-	for (uint i = 0; i < d; i++) fputc('\t', out); \
-		if (line[strLen(line)-1] == '\n') \
-			fprintf(out, line, ##__VA_ARGS__); \
+#define _add(line, ...) { \
+	if (mir) { \
+		for (uint i = 0; i < d; i++) fputc('\t', out); \
+		if (line[strLen(line)-1] == '\n') fprintf(out, line, ##__VA_ARGS__); \
 		else fprintf(out, line "\n", ##__VA_ARGS__); \
 	} else fprintf(out, line, ##__VA_ARGS__); \
 }

@@ -4,7 +4,14 @@
 #include "types.h"
 extern FILE *out;
 uint d = 0;
-static char prt[64] = "printf", c[MAX_LINE], a[MAX_LINE];
+static char
+	prt[64] = "printf",
+	c[MAX_LINE], a[MAX_LINE];
+extern char
+	bool8[8],
+	bool16[9],
+	bool32[9],
+	bool64[9];
 
 static void _pv_add(char* s, const uint len, uint* ci, uint* ai, const char m) {
 	strShiftLeft(s, len, 2);
@@ -44,8 +51,8 @@ __cmd(println) {
 	mkPrt(argc, argv);
 	_add("%s(\"%s\" \"\\n\"%s);", prt, c, a)
 }
-__cmd(setprt) { _ic_
-	_add("extern void %s(const char* format, ...);", argv[2]);
+__cmd(setprt) { __cu(1, 1, "(print_void_name)")
+	_add("extern void %s(const char* format, ...);", argv[2])
 	strCopy(prt, argv[2]);
 }
 __cmd(print) {
@@ -54,7 +61,7 @@ __cmd(print) {
 	mkPrt(argc, argv);
 	_add("%s(\"%s\"%s);", prt, c, a)
 }
-__cmd(float) { _ic_
+__cmd(float) { __cu(1, 1, "<name>(<value>)")
 	const state hd = strContains(argv[2], "."), hf = strEndWith(argv[2], "f");
 	if (hd && hf) _add("%s %s = %s;", argv[0], argv[1], argv[2])
 	else if (hd && !hf) _add("%s %s = %sf;", argv[0], argv[1], argv[2])
@@ -63,7 +70,22 @@ __cmd(float) { _ic_
 		_add("float %s = %s.0f;", argv[1], argv[2])
 	}
 }
-__cmd(perm) { _ic_
+__cmd(bool64) { __cu(1, 1, "<name>(<value>)")
+
+}
+__cmd(bool32) { __cu(1, 1, "<name>(<value>)")
+
+}
+__cmd(bool16) { __cu(1, 1, "<name>(<value>)")
+
+}
+__cmd(bool8) { __cu(1, 1, "<name>(<value>)")
+	_add("%s %s = %s;", bool8, argv[1], argv[2])
+}
+__cmd(setb) { __cu(2, 2, "<bool_list_name>(<bool_index>, <value>)")
+	_add("%s |= %s << %s;", argv[1], argv[3], argv[2])
+}
+__cmd(perm) { __cu(2, 2, "<var_type>(<var_name>, <value>)")
 	if (!strIs(argv[1],   "int") &&
 		!strIs(argv[1], "float") &&
 		!strIs(argv[1], "bool8") &&
@@ -73,21 +95,21 @@ __cmd(perm) { _ic_
 	) return;
 	_add("const %s %s = %s;", argv[1], argv[2], argv[3])
 }
-__cmd(func) { _ic_
+__cmd(func) { __cu(0, MAX_ARGS, "<func_name>([args]) {")
 	if (strIs(argv[1], "main")) _add("int %s() {", argv[1])
 	else _add("void %s() {", argv[1])
 	d++;
 }
-__cmd(uint) { _ic_ _add("unsigned int %s = %s;", argv[1], argv[2]) }
-__cmd(int) { _ic_ _add("int %s = %s;", argv[1], argv[2]) }
-__cmd(set) { _ic_ _add("%s = %s;", argv[1], argv[2]) }
-__cmd(for) {
-	if (argc == 4) _add("for (int %s = 0; i < %s; i++) {", argv[2], argv[3])
+__cmd(uint) { __cu(1, 1, "<name>(<value>)") _add("unsigned int %s = %s;", argv[1], argv[2]) }
+__cmd(int) { __cu(1, 1, "<name>(<value>)") _add("int %s = %s;", argv[1], argv[2]) }
+__cmd(set) { __cu(1, 1, "<var_name>(<new_value>)") _add("%s = %s;", argv[1], argv[2]) }
+__cmd(for) { __cu(2, 3, "(<var_name>, <repeat_count>)' or 'for (<var_name>, <start_at>, <end_at>)")
+	if (argc == 4) _add("for (int %s = 0; %s < %s; %s++) {", argv[2], argv[2], argv[3], argv[2])
 	else if (argc == 5) _add("for (int %s = %s; i < %s; i++) {", argv[2], argv[3], argv[4])
 	d++;
 }
 static uint r = 0;
-__cmd(rep) {
+__cmd(rep) {  __cu(1, 1, "(<repeat_count>)")
 	r++;
 	uint s = 0;
 	strAddChar(argv[1], sizeof(argv[1]), &s, '_');
@@ -97,11 +119,11 @@ __cmd(rep) {
 	_add("for (unsigned int %s = 0; %s < %s; %s++) {", argv[1], argv[1], argv[2], argv[1])
 	d++;
 }
-__cmd(add) {
-	if (strIs(argv[2], "1")) { _add("%s++;", argv[1]); }
-	else _add("%s += %s;", argv[1], argv[2]);
+__cmd(add) { __cu(1, 1, "<name>(<value>)")
+	if (strIs(argv[2], "1")) _add("%s++;", argv[1])
+	else _add("%s += %s;", argv[1], argv[2])
 }
-__cmd(if) { _ic_
+__cmd(if) { __cu(1, 1, "(<value>) {")
 	_add("if (%s) {", argv[2])
 	d++;
 }
@@ -110,7 +132,7 @@ __cmd(end) { _ib_
 	_add("}")
 }
 __cmd(run) { _ic_
-	_add("extern void %s();", argv[1]);
+	_add("extern void %s();", argv[1])
 	_add("%s();", argv[1])
 }
 
@@ -119,6 +141,11 @@ const qcpc cmds[] = {
 	_cmd(setprt),
 	_cmd(print),
 	_cmd(float),
+	_cmd(bool64),
+	_cmd(bool32),
+	_cmd(bool16),
+	_cmd(bool8),
+	_cmd(setb),
 	_cmd(perm),
 	_cmd(func),
 	_cmd(uint),

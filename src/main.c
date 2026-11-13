@@ -5,12 +5,13 @@
 #include <string.h>
 
 extern uint d;
-FILE *out = 0;
+FILE *out = 0, *in = 0;
 state
 	rio = false, // remove stdio
 	mir = false, // make it readable
 	rac = false, // run after compilation
-	rcf = false; // remove C file
+	rcf = false, // remove C file
+	cie = false; // clean if error
 
 uint parseToSingleArgv(const char* line, const char* cmdName, char argv_buf[MAX_ARGS][MAX_LINE], uint* out_argc) {
 	*out_argc = 0;
@@ -70,10 +71,27 @@ uint parseToSingleArgv(const char* line, const char* cmdName, char argv_buf[MAX_
 	*out_argc = argc;
 	return argc;
 }
+static uint actualLine = 1;
+static char l[MAX_LINE];
+void errorHandler(const char* cmd, const char* usage) {
+	printf(
+		"\033[1;38;5;160m[QCP] Error on line:\n"
+		"\033[1;38;5;197m> %03u. %s\n"
+		"\033[1;38;5;160mPlease try use: '%s %s'.\033[0m\n",
+		actualLine, l, cmd, usage);
+	fclose(in);
+	fclose(out);
+	exit(1);
+}
 extern const qcpc cmds[];
 extern const uint cmdCnt;
 #define _chkv(flag, v) if (strIs(argv[i], "-"#flag)) { i++; if (i < argc) v = argv[i]; }
 #define _chkf(flag) if (strIs(argv[i], "-"#flag)) flag = true;
+char
+	bool8[8] = "uint8_t",
+	bool16[9] = "uint16_t",
+	bool32[9] = "uint32_t",
+	bool64[9] = "uint64_t";
 int main(int argc, char **argv) {
 	char *inp = 0, *outp = 0, *bfp = 0,
 	#if defined(_WIN32) || defined(_WIN64)
@@ -90,6 +108,7 @@ int main(int argc, char **argv) {
 		else _chkf(mir)
 		else _chkf(rac)
 		else _chkf(rcf)
+		else _chkf(cie)
 	}
 	if (!inp) return 2;
 	const char *lastSlash = strrchr(inp, '/');
@@ -113,7 +132,7 @@ int main(int argc, char **argv) {
 	if (outp) snprintf(ePath, sizeof(ePath), "%s", outp);
 	else if (bfp) snprintf(ePath, sizeof(ePath), "%s/%s", bfp, baseName);
 	else snprintf(ePath, sizeof(ePath), "%s", baseName);
-	FILE *in = fopen(inp, "r");
+	in = fopen(inp, "r");
 	if (!in) return 3;
 	out = fopen(cPath, "w");
 	if (!out) {
@@ -122,7 +141,21 @@ int main(int argc, char **argv) {
 	}
 	if (!rio) _add("#include <stdio.h>\n")
 	_add("#include <stdint.h>\n")
-	char argslt[MAX_ARGS][MAX_LINE], l[MAX_LINE];
+	if (mir) _add("#define true  1\n")
+	else _add("#define true 1\n")
+	_add("#define false 0\n")
+	_add("typedef unsigned int uint;")
+	if (mir) {
+		strCopy(bool8, "bool8");
+		strCopy(bool16, "bool16");
+		strCopy(bool32, "bool32");
+		strCopy(bool64, "bool64");
+		_add("typedef uint8_t      bool8;")
+		_add("typedef uint16_t     bool16;")
+		_add("typedef uint32_t     bool32;")
+		_add("typedef uint64_t     bool64;")
+	}
+	char argslt[MAX_ARGS][MAX_LINE];
 	uint qargc = 0;
 	while (fgets(l, sizeof(l), in)) {
 		strTrim(l);
@@ -134,6 +167,7 @@ int main(int argc, char **argv) {
 				break;
 			}
 		}
+		actualLine++;
 	}
 	fclose(in);
 	fclose(out);
@@ -142,7 +176,13 @@ int main(int argc, char **argv) {
 	const int to = system(cmd) == 0;
 	snprintf(cmd, sizeof(cmd), "%s \"%s\" -o \"%s\"", ccp, oPath, ePath);
 	const int tf = system(cmd) == 0;
-	if (!(to && tf)) return 5;
+	if (!(to && tf)) {
+		if (cie) {
+			remove(cPath);
+			remove(oPath);
+		}
+		return 5;
+	}
 	if (rcf) remove(cPath);
 	if (rac) {
 		char run_cmd[MAX_LINE + 64];

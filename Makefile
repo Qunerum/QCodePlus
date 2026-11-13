@@ -21,7 +21,7 @@ else
 endif
 
 TARGET = $(BUILD_DIR)/qcp$(EXT)
-TARGET_ARGS = -i program.qcp -bfc $(OBJ) -o $(BUILD_DIR)/program -mir -rac
+TARGET_ARGS ?= -i program.qcp -bfc $(OBJ) -o $(BUILD_DIR)/program -mir -rac
 
 all: linux win
 

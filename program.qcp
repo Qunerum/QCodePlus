@@ -9,6 +9,11 @@ func main() {
 	rep (10) {
 		add x(1)
 	}
+	perm int(y, 10)
+	bool8 b(false)
+	setb b(4, true)
+	setb b(1, true)
+	println(b:b'8)
 	@ test()
 }
 func test() {
