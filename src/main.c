@@ -88,10 +88,20 @@ extern const uint cmdCnt;
 #define _chkv(flag, v) if (strIs(argv[i], "-"#flag)) { i++; if (i < argc) v = argv[i]; }
 #define _chkf(flag) if (strIs(argv[i], "-"#flag)) flag = true;
 char
-	bool8[8] = "uint8_t",
+	bool8[8] =  "uint8_t",
 	bool16[9] = "uint16_t",
 	bool32[9] = "uint32_t",
-	bool64[9] = "uint64_t";
+	bool64[9] = "uint64_t",
+	eq[4] =  "=",
+	lt[4] =  "<",
+	loe[5] = "<=",
+	gt[4] =  ">",
+	goe[5] = ">=",
+	oe[5] = "|=",
+	ae[5] = "&=",
+	sl[5] = "<<",
+	sr[5] = ">>",
+	sp[2] = "";
 int main(int argc, char **argv) {
 	char *inp = 0, *outp = 0, *bfp = 0,
 	#if defined(_WIN32) || defined(_WIN64)
@@ -150,6 +160,16 @@ int main(int argc, char **argv) {
 		strCopy(bool16, "bool16");
 		strCopy(bool32, "bool32");
 		strCopy(bool64, "bool64");
+		strCopy(eq, " = ");
+		strCopy(lt, " < ");
+		strCopy(loe, " <= ");
+		strCopy(gt, " > ");
+		strCopy(goe, " >= ");
+		strCopy(oe, " |= ");
+		strCopy(ae, " &= ");
+		strCopy(sl, " << ");
+		strCopy(sr, " >> ");
+		strCopy(sp, " ");
 		_add("typedef uint8_t      bool8;")
 		_add("typedef uint16_t     bool16;")
 		_add("typedef uint32_t     bool32;")

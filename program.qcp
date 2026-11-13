@@ -5,6 +5,7 @@ func main() {
 		println(i:i)
 		add x(2)
 	}
+	usec("// Hello")
 	@ test()
 	rep (10) {
 		add x(1)
