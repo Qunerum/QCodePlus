@@ -54,6 +54,7 @@ static void mkPrt(const uint argc, char argv[MAX_ARGS][MAX_LINE]) {
 		else if (_chk(h)) _pv_add(argv[i], len, &ci, &ai, 'x');
 		else if (_chk(H)) _pv_add(argv[i], len, &ci, &ai, 'X');
 		else if (_chk(o)) _pv_add(argv[i], len, &ci, &ai, 'o');
+		else if (_chk(t)) _pv_add(argv[i], len, &ci, &ai, 's');
 	}
 }
 __cmd(println) {
@@ -120,6 +121,10 @@ __cmd(usec) { __cu(1, 1, "(<C_code>)")
 	if (strStartWith(argv[2], "//")) _add("%s", argv[2])
 	else _add("{ %s }", argv[2])
 }
+__cmd(text) { __cu(1, 2, "<name>(<max_length>, [value])")
+	if (argc == 3) _add("char %s[%s];", argv[1], argv[2])
+	else if (argc == 4) _add("char %s[%s]%s%s;", argv[1], argv[2], eq, argv[3])
+}
 __cmd(int) { __cu(1, 1, "<name>(<value>)") _add("int %s%s%s;", argv[1], eq, argv[2]) }
 __cmd(set) { __cu(1, 1, "<var_name>(<new_value>)") _add("%s = %s;", argv[1], argv[2]) }
 __cmd(for) { __cu(2, 3, "(<var_name>, <repeat_count>)' or 'for (<var_name>, <start_at>, <end_at>)")
@@ -141,6 +146,17 @@ __cmd(rep) {  __cu(1, 1, "(<repeat_count>)")
 __cmd(add) { __cu(1, 1, "<name>(<value>)")
 	if (strIs(argv[2], "1")) _add("%s++;", argv[1])
 	else _add("%s%s+=%s%s;", argv[1], sp, sp, argv[2])
+}
+__cmd(sub) { __cu(1, 1, "<name>(<value>)")
+	if (strIs(argv[2], "1")) _add("%s--;", argv[1])
+	else _add("%s%s-=%s%s;", argv[1], sp, sp, argv[2])
+}
+__cmd(mul) { __cu(1, 1, "<name>(<value>)")
+	if (!strIs(argv[2], "1")) _add("%s%s*=%s%s;", argv[1], sp, sp, argv[2])
+}
+__cmd(div) { __cu(1, 1, "<name>(<value>)")
+	__te(strIs(argv[2], "0"), "Cannot divide by zero!")
+	_add("%s%s/=%s%s;", argv[1], sp, sp, argv[2])
 }
 __cmd(if) { __cu(1, 1, "(<value>) {")
 	_add("if%s(%s)%s{", sp, argv[2], sp)
@@ -169,11 +185,15 @@ const qcpc cmds[] = {
 	_cmd(func),
 	_cmd(uint),
 	_cmd(usec),
+	_cmd(text),
 	_cmd(int),
 	_cmd(set),
 	_cmd(for),
 	_cmd(rep),
 	_cmd(add),
+	_cmd(sub),
+	_cmd(mul),
+	_cmd(div),
 	_cmd(if),
 	{"}",_qcp_end},
 	{"@",_qcp_run}

@@ -16,6 +16,11 @@ func main() {
 	setb b(1, true)
 	println(b:b'8)
 	@ test()
+	mul x(2)
+	@ test()
+
+	text xD(16, "Hello")
+	println(t:xD)
 }
 func test() {
 	print("Num is: ")
