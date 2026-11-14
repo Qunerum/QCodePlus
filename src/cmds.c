@@ -8,6 +8,8 @@ static char
 	prt[64] = "printf",
 	c[MAX_LINE], a[MAX_LINE];
 extern char
+	btr[5], // true
+	bfa[6], // false
 	bool8[8],
 	bool16[9],
 	bool32[9],
@@ -21,7 +23,9 @@ extern char
 	ae[5],  // &=
 	sl[5],  // <<
 	sr[5],  // >>
-	sp[2];
+	sp[2],
+	po[3],  // (
+	pc[3];  // )
 
 static void _pv_add(char* s, const uint len, uint* ci, uint* ai, const char m) {
 	strShiftLeft(s, len, 2);
@@ -105,11 +109,14 @@ __cmd(perm) { __cu(2, 2, "<var_type>(<var_name>, <value>)")
 		!strIs(argv[1],"bool32") &&
 		!strIs(argv[1],"bool64")
 	) return;
+	if (!mir) {
+		strReplace(argv[3], sizeof(argv[3]), "true", "1");
+	}
 	_add("const %s %s%s%s;", argv[1], argv[2], eq, argv[3])
 }
 __cmd(func) { __cu(0, MAX_ARGS, "<func_name>([args]) {")
-	if (strIs(argv[1], "main")) _add("int %s() {", argv[1])
-	else _add("void %s() {", argv[1])
+	if (strIs(argv[1], "main")) _add("int %s(%s{", argv[1], pc)
+	else _add("void %s(%s{", argv[1], pc)
 	d++;
 }
 __cmd(uint) { __cu(1, 1, "<name>(<value>)") _add("uint %s%s%s;", argv[1], eq, argv[2]) }
@@ -119,7 +126,7 @@ __cmd(usec) { __cu(1, 1, "(<C_code>)")
 	if (argv[2][0] == '\"') strShiftLeft(argv[2], l, 1);
 	if (!mir && (strStartWith(argv[2], "//") || strStartWith(argv[2], "/*") || strEndWith(argv[2], "*/"))) return;
 	if (strStartWith(argv[2], "//")) _add("%s", argv[2])
-	else _add("{ %s }", argv[2])
+	else _add("%s", argv[2])
 }
 __cmd(text) { __cu(1, 2, "<name>(<max_length>, [value])")
 	if (argc == 3) _add("char %s[%s];", argv[1], argv[2])
@@ -128,8 +135,8 @@ __cmd(text) { __cu(1, 2, "<name>(<max_length>, [value])")
 __cmd(int) { __cu(1, 1, "<name>(<value>)") _add("int %s%s%s;", argv[1], eq, argv[2]) }
 __cmd(set) { __cu(1, 1, "<var_name>(<new_value>)") _add("%s = %s;", argv[1], argv[2]) }
 __cmd(for) { __cu(2, 3, "(<var_name>, <repeat_count>)' or 'for (<var_name>, <start_at>, <end_at>)")
-	if (argc == 4) _add("for%s(int %s%s0;%s%s%s%s;%s%s++)%s{", sp, argv[2], eq, sp, argv[2], lt, argv[3], sp, argv[2], sp)
-	else if (argc == 5) _add("for%s(int %s%s%s;%si%s%s;%si++)%s{", sp, argv[2], eq, argv[3], sp, lt, argv[4], sp, sp)
+	if (argc == 4) _add("for%sint %s%s0;%s%s%s%s;%s%s++%s{", po, argv[2], eq, sp, argv[2], lt, argv[3], sp, argv[2], pc)
+	else if (argc == 5) _add("for%sint %s%s%s;%si%s%s;%si++%s{", po, argv[2], eq, argv[3], sp, lt, argv[4], sp, pc)
 	d++;
 }
 static uint r = 0;
@@ -140,7 +147,7 @@ __cmd(rep) {  __cu(1, 1, "(<repeat_count>)")
 	strAddStr(argv[1], sizeof(argv[1]), &s, "rep");
 	strAddNum(argv[1], sizeof(argv[1]), &s, r, 16);
 	strAddChar(argv[1], sizeof(argv[1]), &s, '_');
-	_add("for%s(uint %s%s0;%s%s%s%s;%s%s++)%s{", sp, argv[1], eq, sp, argv[1], lt, argv[2], sp, argv[1], sp)
+	_add("for%suint %s%s0;%s%s%s%s;%s%s++%s{", po, argv[1], eq, sp, argv[1], lt, argv[2], sp, argv[1], pc)
 	d++;
 }
 __cmd(add) { __cu(1, 1, "<name>(<value>)")
@@ -159,7 +166,7 @@ __cmd(div) { __cu(1, 1, "<name>(<value>)")
 	_add("%s%s/=%s%s;", argv[1], sp, sp, argv[2])
 }
 __cmd(if) { __cu(1, 1, "(<value>) {")
-	_add("if%s(%s)%s{", sp, argv[2], sp)
+	_add("if%s%s%s{", po, argv[2], pc)
 	d++;
 }
 __cmd(end) { _ib_
