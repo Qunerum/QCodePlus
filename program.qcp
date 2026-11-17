@@ -15,6 +15,8 @@ func main() {
 	setb b(4, true)
 	setb b(1, true)
 	println(b:b'8)
+	setb b(1, false)
+	println(b:b'8)
 	@ test()
 	mul x(2)
 	@ test()

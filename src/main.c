@@ -155,9 +155,10 @@ int main(int argc, char **argv) {
 	}
 	if (!rio) _add("#include <stdio.h>\n")
 	_add("#include <stdint.h>\n")
-	if (mir) _add("#define true  1\n")
-	else _add("#define true 1\n")
-	_add("#define false 0\n")
+	if (mir) {
+		_add("#define true  1\n")
+		_add("#define false 0\n")
+	}
 	_add("typedef unsigned int uint;")
 	if (mir) {
 		strCopy(btr, "true");

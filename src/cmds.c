@@ -86,20 +86,31 @@ __cmd(float) { __cu(1, 1, "<name>(<value>)")
 		_add("float %s%s%s.0f;", argv[1], eq, argv[2])
 	}
 }
+static void blRep(char* a) {
+	if (!mir) {
+		strReplace(a, MAX_LINE, "true", "1");
+		strReplace(a, MAX_LINE, "false", "0");
+	}
+}
 __cmd(bool64) { __cu(1, 1, "<name>(<value>)")
-
+	blRep(argv[2]);
+	_add("%s %s%s%s;", bool64, argv[1], eq, argv[2])
 }
 __cmd(bool32) { __cu(1, 1, "<name>(<value>)")
-
+	blRep(argv[2]);
+	_add("%s %s%s%s;", bool32, argv[1], eq, argv[2])
 }
 __cmd(bool16) { __cu(1, 1, "<name>(<value>)")
-
+	blRep(argv[2]);
+	_add("%s %s%s%s;", bool16, argv[1], eq, argv[2])
 }
 __cmd(bool8) { __cu(1, 1, "<name>(<value>)")
+	blRep(argv[2]);
 	_add("%s %s%s%s;", bool8, argv[1], eq, argv[2])
 }
 __cmd(setb) { __cu(2, 2, "<bool_list_name>(<bool_index>, <value>)")
-	_add("%s%s%s%s%s;", argv[1], oe, argv[3], sl, argv[2])
+	if (strIs(argv[3], "false")) _add("%s%s~(%s%s%s);", argv[1], ae, bfa, sl, argv[2])
+	else if (strIs(argv[3], "true")) _add("%s%s%s%s%s;", argv[1], oe, btr, sl, argv[2])
 }
 __cmd(perm) { __cu(2, 2, "<var_type>(<var_name>, <value>)")
 	if (!strIs(argv[1],   "int") &&
@@ -111,6 +122,7 @@ __cmd(perm) { __cu(2, 2, "<var_type>(<var_name>, <value>)")
 	) return;
 	if (!mir) {
 		strReplace(argv[3], sizeof(argv[3]), "true", "1");
+		strReplace(argv[3], sizeof(argv[3]), "false", "0");
 	}
 	_add("const %s %s%s%s;", argv[1], argv[2], eq, argv[3])
 }
