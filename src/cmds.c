@@ -67,6 +67,11 @@ __cmd(println) {
 	mkPrt(argc, argv);
 	_add("%s(\"%s\\n\"%s);", prt, c, a)
 }
+__cmd(include) { __cu(1, 1, "(<lib-name>)")
+	if (strIs(argv[2], "text")) {
+		//
+	}
+}
 __cmd(setprt) { __cu(1, 1, "(print_void_name)")
 	_add("extern void %s(const char* format, ...);", argv[2])
 	strCopy(prt, argv[2]);
@@ -136,9 +141,13 @@ __cmd(usec) { __cu(1, 1, "(<C_code>)")
 	const uint l = strLen(argv[2]) + 1;
 	if (argv[2][l - 2] == '\"') argv[2][l - 2] = '\0';
 	if (argv[2][0] == '\"') strShiftLeft(argv[2], l, 1);
+	if (argv[2][0] == '#') {
+		if (!mir) _add("\n");
+		_add("%s\n", argv[2])
+		return;
+	}
 	if (!mir && (strStartWith(argv[2], "//") || strStartWith(argv[2], "/*") || strEndWith(argv[2], "*/"))) return;
-	if (strStartWith(argv[2], "//")) _add("%s", argv[2])
-	else _add("%s", argv[2])
+	_add("%s", argv[2])
 }
 __cmd(text) { __cu(1, 2, "<name>(<max_length>, [value])")
 	if (argc == 3) _add("char %s[%s];", argv[1], argv[2])
@@ -189,9 +198,9 @@ __cmd(run) { _ic_
 	_add("extern void %s();", argv[1])
 	_add("%s();", argv[1])
 }
-
 const qcpc cmds[] = {
 	_cmd(println),
+	_cmd(include),
 	_cmd(setprt),
 	_cmd(print),
 	_cmd(float),

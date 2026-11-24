@@ -6,6 +6,7 @@ func main() {
 		add x(2)
 	}
 	usec("// Hello")
+	usec("#define st")
 	@ test()
 	rep (10) {
 		add x(1)
