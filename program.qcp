@@ -1,31 +1,11 @@
+use(text)
+usec("// Siema")
+
 int x(0)
-
-func main() {
-	for (i, 10) {
-		println(i:i)
-		add x(2)
-	}
-	usec("// Hello")
-	usec("#define st")
-	@ test()
-	rep (10) {
-		add x(1)
-	}
-	perm int(y, 10)
-	bool8 b(false)
-	setb b(4, true)
-	setb b(1, true)
-	println(b:b'8)
-	setb b(1, false)
-	println(b:b'8)
-	@ test()
-	mul x(2)
-	@ test()
-
-	text xD(16, "Hello")
-	println(t:xD)
-}
-func test() {
-	print("Num is: ")
-	println(i:x)
-}
+perm int(y, 10)
+func main()
+	str test(64)
+	for(i, 16)
+		text add(test, i:i, " ")
+	end
+end

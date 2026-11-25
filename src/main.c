@@ -11,6 +11,7 @@ state
 	mir = false, // make it readable
 	rac = false, // run after compilation
 	rcf = false, // remove C file
+	dmo = false, // don't make object file
 	cie = false; // clean if error
 
 uint parseToSingleArgv(const char* line, const char* cmdName, char argv_buf[MAX_ARGS][MAX_LINE], uint* out_argc) {
@@ -122,6 +123,7 @@ int main(int argc, char **argv) {
 		else _chkf(mir)
 		else _chkf(rac)
 		else _chkf(rcf)
+		else _chkf(dmo)
 		else _chkf(cie)
 	}
 	if (!inp) return 2;
@@ -190,7 +192,8 @@ int main(int argc, char **argv) {
 		strTrim(l);
 		if (strStartWith(l, "//")) continue;
 		for (uint i = 0; i < cmdCnt; i++) {
-			if (strStartWith(l, cmds[i].name)) {
+			const uint cl = strLen(cmds[i].name);
+			if (strStartWith(l, cmds[i].name) && (cl == 1 || strIs(l, "end") || l[cl] == ' ' || l[cl] == '(')) {
 				parseToSingleArgv(l, cmds[i].name, argslt, &qargc);
 				if (cmds[i].handler != NULL) cmds[i].handler(qargc, argslt);
 				break;
