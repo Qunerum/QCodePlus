@@ -8,24 +8,15 @@ static char
 	prt[64] = "printf",
 	c[MAX_LINE], a[MAX_LINE];
 extern char
-	btr[5], // true
-	bfa[6], // false
-	bool8[8],
-	bool16[9],
-	bool32[9],
-	bool64[9],
-	eq[4],  // =
-	lt[4],  // <
-	loe[5], // <=
-	gt[4],  // >
-	goe[5], // >=
-	oe[5],  // |=
-	ae[5],  // &=
-	sl[5],  // <<
-	sr[5],  // >>
-	sp[2],
-	po[3],  // (
-	pc[3];  // )
+	sp[2],eq[4],co[3], // = ,
+	bool8[8],bool16[9],
+	bool32[9],bool64[9],
+	btr[5],bfa[6],//  1 0
+	lt[4],loe[5], //  < <=
+	gt[4],goe[5], //  > >=
+	oe[5],ae[5],  // |= &=
+	sl[5],sr[5],  // << >>
+	po[3],pc[3];  //  ( )
 
 static void _pv_add(char* s, const uint len, uint* ci, uint* ai, const char m) {
 	strShiftLeft(s, len, 2);
@@ -60,7 +51,7 @@ static void parseArg(const uint start, const uint argc, char argv[MAX_ARGS][MAX_
 		else if (_chk(h)) _pv_add(argv[i], len, &ci, &ai, 'x');
 		else if (_chk(H)) _pv_add(argv[i], len, &ci, &ai, 'X');
 		else if (_chk(o)) _pv_add(argv[i], len, &ci, &ai, 'o');
-		else if (_chk(t)) _pv_add(argv[i], len, &ci, &ai, 's');
+		else if (_chk(s)) _pv_add(argv[i], len, &ci, &ai, 's');
 	}
 }
 
@@ -68,14 +59,32 @@ static void parseArg(const uint start, const uint argc, char argv[MAX_ARGS][MAX_
 #define TEXT "__qcp_text_"
 __cmd(use) { __cu(1, 1, "(<lib_name>)")
 	if (strIs(argv[2], "text")) {
-		_add(VOID TEXT "add(char* s,const uint l,uint* i%s{ }", pc)
+		_add(VOID TEXT "addc(char* s%sconst uint l%suint* i%sconst char v%s{", co, co, co, pc) d++;
+		_add("if%s!s%s||%sl%s==%s0%s||%s!i%sreturn;", po, sp, sp, sp, sp, sp, sp, pc)
+		_add("if%s*i%sl%s-%s1%s{", po, lt, sp, sp, pc) d++;
+		_add("s[(*i)++]%sv;", eq)
+		_add("s[*i]%s'\\0';", eq)
+		d--; _add("}")
+		d--; _add("}")
+
+		_add(VOID TEXT "add(char* s%sconst uint l%suint* i%sconst char* v%s{", co, co, co, pc) d++;
+		_add("if%s!s%s||%sl%s==%s0%s||%s!i%sreturn;", po, sp, sp, sp, sp, sp, sp, pc)
+		_add("if%s!v%sv%s\"(null)\";", po, pc, eq)
+		_add("while%s*v%s" TEXT "addc(s%sl%si%s*v++%s;", po, pc, co, co, co, pc)
+		d--; _add("}")
 	}
 }
 __cmd(text) { __cu(1, MAX_ARGS, "cmd(<str_name>, ...)")
 	if (strIs(argv[1], "add")) {
-		_add(TEXT "add();")
+		const uint l = strLen(argv[3]) - 2;
+		if (argv[3][0] == '\"') strShiftLeft(argv[3], sizeof(argv[3]), 1);
+		if (argv[3][l] == '\"') argv[3][l] = '\0';
+		if (l == 1) _add(TEXT "addc(%s%ssizeof(%s)%s&__str_%s%s'%s');", argv[2], co, argv[2], co, argv[2], co, argv[3])
+		else _add(TEXT "add(%s%ssizeof(%s)%s&__str_%s%s\"%s\");", argv[2], co, argv[2], co, argv[2], co, argv[3])
 	}
-	_add("// SIEMANO")
+	else if (strIs(argv[1], "cut")) {
+		//
+	}
 }
 
 __cmd(usec) { __cu(1, 1, "(<C_code>)")
@@ -117,13 +126,12 @@ __cmd(float) { __cu(1, 1, "<name>(<value>)")
 }
 __cmd(str) { __cu(1, 2, "<name>(<max_length>, [value])")
 	uint l = 0;
-	if (argc == 3) {
-		_add("char %s[%s];", argv[1], argv[2])
-	}
+	if (argc == 3) _add("char %s[%s];", argv[1], argv[2])
 	else if (argc == 4) {
+		l = strLen(argv[3]) - 2;
 		_add("char %s[%s]%s%s;", argv[1], argv[2], eq, argv[3])
 	}
-	_add("uint __str_%s%s0;", argv[1], eq);
+	_add("uint __str_%s%s%u;", argv[1], eq, l);
 }
 static void blRep(char* a) {
 	if (!mir) {
@@ -183,6 +191,10 @@ __cmd(div) { __cu(1, 1, "<name>(<value>)")
 	_add("%s%s/=%s%s;", argv[1], sp, sp, argv[2])
 }
 
+__cmd(if) { __cu(1, 1, "(<value>) {")
+	_add("if%s%s%s{", po, argv[2], pc)
+	d++;
+}
 __cmd(for) { __cu(2, 3, "(<var_name>, <repeat_count>)' or 'for (<var_name>, <start_at>, <end_at>)")
 	if (argc == 4) _add("for%sint %s%s0;%s%s%s%s;%s%s++%s{", po, argv[2], eq, sp, argv[2], lt, argv[3], sp, argv[2], pc)
 	else if (argc == 5) _add("for%sint %s%s%s;%si%s%s;%si++%s{", po, argv[2], eq, argv[3], sp, lt, argv[4], sp, pc)
@@ -199,11 +211,6 @@ __cmd(rep) {  __cu(1, 1, "(<repeat_count>)")
 	_add("for%suint %s%s0;%s%s%s%s;%s%s++%s{", po, argv[1], eq, sp, argv[1], lt, argv[2], sp, argv[1], pc)
 	d++;
 }
-__cmd(if) { __cu(1, 1, "(<value>) {")
-	_add("if%s%s%s{", po, argv[2], pc)
-	d++;
-}
-
 __cmd(func) { __cu(0, MAX_ARGS, "<func_name>([args])")
 	if (strIs(argv[1], "main")) _add("int %s(%s{%s", argv[1], pc, rio ? "" : "putchar(0);")
 	else _add("void %s(%s{", argv[1], pc)

@@ -1,11 +1,13 @@
 use(text)
-usec("// Siema")
 
 int x(0)
-perm int(y, 10)
 func main()
-	str test(64)
+	str test(64, "Hello")
 	for(i, 16)
-		text add(test, i:i, " ")
+		text add(test, " ")
+		text add(test, "...")
 	end
+	println(s:test)
+	text cut(test, 5)
+	println(s:test)
 end
