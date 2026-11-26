@@ -89,17 +89,21 @@ extern const uint cmdCnt;
 #define _chkv(flag, v) if (strIs(argv[i], "-"#flag)) { i++; if (i < argc) v = argv[i]; }
 #define _chkf(flag) if (strIs(argv[i], "-"#flag)) flag = true;
 char
-	sp[2] = "", eq[4] = "=", co[3] = ",",
+	sp[2] = "",
 	bool8[8] =  "uint8_t",
 	bool16[9] = "uint16_t",
 	bool32[9] = "uint32_t",
 	bool64[9] = "uint64_t",
 	btr[5] = "1", bfa[6] = "0",
-	lt[4] = "<",  loe[5] = "<=",
-	gt[4] = ">",  goe[5] = ">=",
-	oe[5] = "|=", ae[5] = "&=",
-	sl[5] = "<<", sr[5] = ">>",
-	po[3] = "(",  pc[3] = ")";
+	eq[4] =  "=", co[3] =  ",",
+	lt[4] =  "<", loe[5] = "<=",
+	gt[4] =  ">", goe[5] = ">=",
+	is[5] =  "==",isn[5] = "!=",
+	ae[5] =  "&=",oe[5] =  "|=",
+	and[5] = "&&",or[5] =  "||",
+	sl[5] =  "<<",sr[5] =  ">>",
+	po[3] =  "(", pc[3] =  ")",
+	add[4] = "+", sub[4] =  "-";
 int main(int argc, char **argv) {
 	char *inp = 0, *outp = 0, *bfp = 0,
 	#if defined(_WIN32) || defined(_WIN64)
@@ -156,25 +160,31 @@ int main(int argc, char **argv) {
 	}
 	_add("typedef unsigned int uint;")
 	if (mir) {
-		strCopy(sp, " ");
-		strCopy(eq, " = ");
-		strCopy(co, ", ");
+		strCopy(sp,    " ");
 		strCopy(bool8, "bool8");
-		strCopy(bool16, "bool16");
-		strCopy(bool32, "bool32");
-		strCopy(bool64, "bool64");
-		strCopy(btr, "true");
-		strCopy(bfa, "false");
-		strCopy(lt, " < ");
-		strCopy(loe, " <= ");
-		strCopy(gt, " > ");
-		strCopy(goe, " >= ");
-		strCopy(oe, " |= ");
-		strCopy(ae, " &= ");
-		strCopy(sl, " << ");
-		strCopy(sr, " >> ");
-		strCopy(po, " (");
-		strCopy(pc, ") ");
+		strCopy(bool16,"bool16");
+		strCopy(bool32,"bool32");
+		strCopy(bool64,"bool64");
+		strCopy(btr,   "true");
+		strCopy(bfa,   "false");
+		strCopy(eq,    " = ");
+		strCopy(co,    ", ");
+		strCopy(lt,    " < ");
+		strCopy(loe,   " <= ");
+		strCopy(gt,    " > ");
+		strCopy(goe,   " >= ");
+		strCopy(is,    " == ");
+		strCopy(isn,   " != ");
+		strCopy(ae,    " &= ");
+		strCopy(oe,    " |= ");
+		strCopy(and,   " && ");
+		strCopy(or,    " || ");
+		strCopy(sl,    " << ");
+		strCopy(sr,    " >> ");
+		strCopy(po,    " (");
+		strCopy(pc,    ") ");
+		strCopy(add,   " + ");
+		strCopy(sub,   " - ");
 		_add("typedef uint8_t      bool8;")
 		_add("typedef uint16_t     bool16;")
 		_add("typedef uint32_t     bool32;")

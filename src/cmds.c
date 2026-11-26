@@ -1,6 +1,5 @@
 #include "string.h"
 #include <stdio.h>
-// #include <string.h>
 #include "types.h"
 extern FILE *out;
 uint d = 0;
@@ -8,15 +7,19 @@ static char
 	prt[64] = "printf",
 	c[MAX_LINE], a[MAX_LINE];
 extern char
-	sp[2],eq[4],co[3], // = ,
+	sp[2],
 	bool8[8],bool16[9],
 	bool32[9],bool64[9],
-	btr[5],bfa[6],//  1 0
-	lt[4],loe[5], //  < <=
-	gt[4],goe[5], //  > >=
-	oe[5],ae[5],  // |= &=
-	sl[5],sr[5],  // << >>
-	po[3],pc[3];  //  ( )
+	btr[5],bfa[6], //  1 0
+	eq[4],co[3],   //  = ,
+	lt[4], gt[4],  //  < >
+	loe[5],goe[5], // =< >=
+	is[5], isn[5], // == !=
+	ae[5], oe[5],  // &= |=
+	or[3], and[3], // && ||
+	sl[5], sr[5],  // << >>
+	po[3], pc[3],  //  ( )
+	add[4],sub[4]; //  + -
 
 static void _pv_add(char* s, const uint len, uint* ci, uint* ai, const char m) {
 	strShiftLeft(s, len, 2);
@@ -59,19 +62,49 @@ static void parseArg(const uint start, const uint argc, char argv[MAX_ARGS][MAX_
 #define TEXT "__qcp_text_"
 __cmd(use) { __cu(1, 1, "(<lib_name>)")
 	if (strIs(argv[2], "text")) {
-		_add(VOID TEXT "addc(char* s%sconst uint l%suint* i%sconst char v%s{", co, co, co, pc) d++;
-		_add("if%s!s%s||%sl%s==%s0%s||%s!i%sreturn;", po, sp, sp, sp, sp, sp, sp, pc)
-		_add("if%s*i%sl%s-%s1%s{", po, lt, sp, sp, pc) d++;
+		_add(VOID TEXT "addc(char* s%sconst uint l%suint* i%sconst char v%s{", co,co,co,pc) d++;
+		_add("if%s!s%s!l%s!i%sreturn;", po,or,or,pc)
+		_add("if%s*i%sl%s1%s{", po,lt,sub,pc) d++;
 		_add("s[(*i)++]%sv;", eq)
 		_add("s[*i]%s'\\0';", eq)
 		d--; _add("}")
 		d--; _add("}")
 
-		_add(VOID TEXT "add(char* s%sconst uint l%suint* i%sconst char* v%s{", co, co, co, pc) d++;
-		_add("if%s!s%s||%sl%s==%s0%s||%s!i%sreturn;", po, sp, sp, sp, sp, sp, sp, pc)
+		_add(VOID TEXT "add(char* s%sconst uint l%suint* i%sconst char* v%s{", co,co,co,pc) d++;
+		_add("if%s!s%s!l%s!i%sreturn;", po,or,or,pc)
 		_add("if%s!v%sv%s\"(null)\";", po, pc, eq)
-		_add("while%s*v%s" TEXT "addc(s%sl%si%s*v++%s;", po, pc, co, co, co, pc)
+		_add("while%s*v%s" TEXT "addc(s%sl%si%s*v++%s;", po,pc,co,co,co,pc)
 		d--; _add("}")
+
+		_add(VOID TEXT "shift(char* s%suint l%suint* i%sconst int v%s{", co,co,co,pc) d++;
+		_add("if%s!s%s!l%s!i%s!v%sreturn;", po,or,or,or,pc)
+		_add("const int r%sv%s0%s?%s-v%s:%sv;", eq,lt,sp,sp,sp,sp)
+		_add("if%sv%s0%s{", po,gt,pc) d++;
+		_add("for%sint c%s*i;%sc%s0;%sc--%s{", po,eq,sp,goe,sp,pc) d++;
+		_add("const uint n%sc%s+%sr;", eq,sp,sp)
+		_add("if%sn%sl%s1%ss[n]%ss[c];", po,lt,sub,pc,eq)
+		d--; _add("}")
+		_add("for%suint c%s0;%sc%sr%sc%sl%s1;%sc++%ss[c]%s' ';", po,eq,sp,lt,and,lt,sub,sp,pc,eq)
+		_add("*i%s(*i%sr%sl%s1%s?%s*i%sr%s:%sl%s1);", eq,add,lt,sub,pc,po,add,pc,po,sub)
+		_add("s[*i]%s'\\0';", eq)
+		d--; _add("}%selse%s{", sp,sp) d++;
+		_add("if%sr%s*i%s{", po,goe,pc) d++;
+		_add("s[0]%s'\\0';", eq)
+		_add("*i%s0;", eq)
+		_add("return;")
+		d--; _add("}")
+		_add("uint n%s0;", eq)
+		_add("for%suint c%sr;%sc%s*i;%sc++%ss[n++]%ss[c];", po,eq,sp,lt,sp,pc,eq)
+		_add("s[n]%s'\\0';", eq)
+		_add("*i%sn;", eq)
+		d--; _add("}")
+		d--; _add("}")
+
+		// _add(VOID TEXT "(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
+		// _add("")
+		// _add("")
+		// _add("")
+		// d--; _add("}")
 	}
 }
 __cmd(text) { __cu(1, MAX_ARGS, "cmd(<str_name>, ...)")
@@ -79,12 +112,10 @@ __cmd(text) { __cu(1, MAX_ARGS, "cmd(<str_name>, ...)")
 		const uint l = strLen(argv[3]) - 2;
 		if (argv[3][0] == '\"') strShiftLeft(argv[3], sizeof(argv[3]), 1);
 		if (argv[3][l] == '\"') argv[3][l] = '\0';
-		if (l == 1) _add(TEXT "addc(%s%ssizeof(%s)%s&__str_%s%s'%s');", argv[2], co, argv[2], co, argv[2], co, argv[3])
-		else _add(TEXT "add(%s%ssizeof(%s)%s&__str_%s%s\"%s\");", argv[2], co, argv[2], co, argv[2], co, argv[3])
+		if (l == 1 || (l == 2 && argv[3][0] == '\\')) _add(TEXT "addc(%s%ssizeof(%s)%s&__str_%s%s'%s');", argv[2],co,argv[2],co,argv[2],co,argv[3])
+		else _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s\"%s\");", argv[1],argv[2],co,argv[2],co,argv[2],co,argv[3])
 	}
-	else if (strIs(argv[1], "cut")) {
-		//
-	}
+	else if (strIs(argv[1], "shift")) _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s);", argv[1],argv[2],co,argv[2],co,argv[2],co,argv[3])
 }
 
 __cmd(usec) { __cu(1, 1, "(<C_code>)")
@@ -183,9 +214,7 @@ __cmd(sub) { __cu(1, 1, "<name>(<value>)")
 	if (strIs(argv[2], "1")) _add("%s--;", argv[1])
 	else _add("%s%s-=%s%s;", argv[1], sp, sp, argv[2])
 }
-__cmd(mul) { __cu(1, 1, "<name>(<value>)")
-	if (!strIs(argv[2], "1")) _add("%s%s*=%s%s;", argv[1], sp, sp, argv[2])
-}
+__cmd(mul) { __cu(1, 1, "<name>(<value>)") if (!strIs(argv[2], "1")) _add("%s%s*=%s%s;", argv[1], sp, sp, argv[2]) }
 __cmd(div) { __cu(1, 1, "<name>(<value>)")
 	__te(strIs(argv[2], "0"), "Cannot divide by zero!")
 	_add("%s%s/=%s%s;", argv[1], sp, sp, argv[2])
