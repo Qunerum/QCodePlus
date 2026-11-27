@@ -44,7 +44,6 @@ $(TARGET): $(OBJS)
 
 run: all
 	@clear
-	@echo "--- Running on $(PLATFORM) ---"
 	@./$(TARGET) $(TARGET_ARGS)
 
 clean:

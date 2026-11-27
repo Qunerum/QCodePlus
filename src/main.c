@@ -16,7 +16,7 @@ state
 
 uint parseToSingleArgv(const char* line, const char* cmdName, char argv_buf[MAX_ARGS][MAX_LINE], uint* out_argc) {
 	*out_argc = 0;
-	uint nameL = strLen(cmdName);
+	const uint nameL = strLen(cmdName);
 	const char* startParen = strchr(line, '(');
 	if (!startParen) return 0;
 	char prefix[MAX_LINE];
@@ -90,6 +90,7 @@ extern const uint cmdCnt;
 #define _chkf(flag) if (strIs(argv[i], "-"#flag)) flag = true;
 char
 	sp[2] = "",
+	cz[5] = "0",
 	bool8[8] =  "uint8_t",
 	bool16[9] = "uint16_t",
 	bool32[9] = "uint32_t",
@@ -161,6 +162,7 @@ int main(int argc, char **argv) {
 	_add("typedef unsigned int uint;")
 	if (mir) {
 		strCopy(sp,    " ");
+		strCopy(cz,    "'\\0'");
 		strCopy(bool8, "bool8");
 		strCopy(bool16,"bool16");
 		strCopy(bool32,"bool32");

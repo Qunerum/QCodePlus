@@ -7,7 +7,7 @@ static char
 	prt[64] = "printf",
 	c[MAX_LINE], a[MAX_LINE];
 extern char
-	sp[2],
+	sp[2],cz[5],
 	bool8[8],bool16[9],
 	bool32[9],bool64[9],
 	btr[5],bfa[6], //  1 0
@@ -63,7 +63,7 @@ static void parseArg(const uint start, const uint argc, char argv[MAX_ARGS][MAX_
 __cmd(use) { __cu(1, 1, "(<lib_name>)")
 	if (strIs(argv[2], "text")) {
 		_add(VOID TEXT "addc(char* s%sconst uint l%suint* i%sconst char v%s{", co,co,co,pc) d++;
-		_add("if%s!s%s!l%s!i%sreturn;", po,or,or,pc)
+		_add("if%s!s%s!l%s!i%s!v%sreturn;", po,or,or,or,pc)
 		_add("if%s*i%sl%s1%s{", po,lt,sub,pc) d++;
 		_add("s[(*i)++]%sv;", eq)
 		_add("s[*i]%s'\\0';", eq)
@@ -71,12 +71,12 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		d--; _add("}")
 
 		_add(VOID TEXT "add(char* s%sconst uint l%suint* i%sconst char* v%s{", co,co,co,pc) d++;
-		_add("if%s!s%s!l%s!i%sreturn;", po,or,or,pc)
+		_add("if%s!s%s!l%s!i%s!v%sreturn;", po,or,or,or,pc)
 		_add("if%s!v%sv%s\"(null)\";", po, pc, eq)
 		_add("while%s*v%s" TEXT "addc(s%sl%si%s*v++%s;", po,pc,co,co,co,pc)
 		d--; _add("}")
 
-		_add(VOID TEXT "shift(char* s%suint l%suint* i%sconst int v%s{", co,co,co,pc) d++;
+		_add(VOID TEXT "shift(char* s%sconst uint l%suint* i%sconst int v%s{", co,co,co,pc) d++;
 		_add("if%s!s%s!l%s!i%s!v%sreturn;", po,or,or,or,pc)
 		_add("const int r%sv%s0%s?%s-v%s:%sv;", eq,lt,sp,sp,sp,sp)
 		_add("if%sv%s0%s{", po,gt,pc) d++;
@@ -89,26 +89,44 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		_add("s[*i]%s'\\0';", eq)
 		d--; _add("}%selse%s{", sp,sp) d++;
 		_add("if%sr%s*i%s{", po,goe,pc) d++;
-		_add("s[0]%s'\\0';", eq)
+		_add("s[0]%s%s;", eq,cz)
 		_add("*i%s0;", eq)
 		_add("return;")
 		d--; _add("}")
 		_add("uint n%s0;", eq)
 		_add("for%suint c%sr;%sc%s*i;%sc++%ss[n++]%ss[c];", po,eq,sp,lt,sp,pc,eq)
-		_add("s[n]%s'\\0';", eq)
+		_add("s[n]%s%s;", eq,cz)
 		_add("*i%sn;", eq)
 		d--; _add("}")
 		d--; _add("}")
 
-		// _add(VOID TEXT "(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
-		// _add("")
-		// _add("")
-		// _add("")
-		// d--; _add("}")
+		_add(VOID TEXT "trimc(char* s%sconst uint l%suint* i%sconst %s e%sconst char c%s{", co,co,co,bool8,co,pc) d++;
+		_add("if (!s || !l || !i || !c) return;")
+		_add("if (e) {") d++;
+		_add("while (*i > 0 && s[*i - 1] == c) (*i)--;")
+		_add("s[*i] = %s;", cz)
+		d--; _add("} else {") d++;
+		_add("uint n = 0;")
+		_add("while (s[n] && s[n] == c) n++;")
+		_add("if (!n) return;")
+		_add("uint m = 0;")
+		_add("while (s[n + m]) {") d++;
+		_add("s[m] = s[n + m];")
+		_add("m++;")
+		d--; _add("}")
+		_add("s[m] = %s;", cz)
+		d--; _add("}")
+		d--; _add("}")
+
+		_add(VOID TEXT "a(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
+		_add("")
+		_add("")
+		_add("")
+		d--; _add("}")
 	}
 }
 __cmd(text) { __cu(1, MAX_ARGS, "cmd(<str_name>, ...)")
-	if (strIs(argv[1], "add")) {
+	if (strIs(argv[1], "add")) { __cu(2, 2, "add(<str_name>, ...)")
 		const uint l = strLen(argv[3]) - 2;
 		if (argv[3][0] == '\"') strShiftLeft(argv[3], sizeof(argv[3]), 1);
 		if (argv[3][l] == '\"') argv[3][l] = '\0';
