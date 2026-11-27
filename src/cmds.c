@@ -119,10 +119,40 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		d--; _add("}")
 		d--; _add("}")
 
-		_add(VOID TEXT "replace(char* s%sconst uint l%suint* i%sconst char* a%sconst char* b%s{", co,co,co,co,pc) d++;
-		_add("if (!s || !l || !i || !a) return;")
-		_add("if (!b) b = "";
+		_add(VOID TEXT startWith"(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
 		_add("")
+		_add("")
+		_add("")
+		d--; _add("}")
+
+		_add(VOID TEXT "endWith(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
+		_add("")
+		_add("")
+		_add("")
+		d--; _add("}")
+
+		_add(VOID TEXT "contains(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
+		_add("")
+		_add("")
+		_add("")
+		d--; _add("}")
+
+		_add(VOID TEXT "copy(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
+		_add("")
+		_add("")
+		_add("")
+		d--; _add("}")
+
+		_add(VOID TEXT "replace(char* s%sconst uint l%suint* i%sconst char* a%sconst uint al%sconst char* b%sconst uint bl%s{", co,co,co,co,co,co,pc) d++;
+		_add("if (!s || !l || !i || !a || !al || al > l) return;")
+		_add("if (!b) b = "";
+		_add("/* contains */")
+		_add("const int d = (int)bl - (int)al;")
+		_add("uint n = 0;")
+		_add("while (s[n]) {") d++;
+		_add("if (1 /* start with */) {") d++;
+		d--; _add("}")
+		d--; _add("}")
 		_add("")
 		_add("")
 		_add("")
