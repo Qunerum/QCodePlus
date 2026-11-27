@@ -9,7 +9,9 @@ func main()
 	end
 	println(s:test)
 	text shift(test, 2)
-	println("shift 2:\n", s:test)
-	text shift(test, -3)
-	println("shift -3:\n", s:test)
+	println("shift 2:\n'", s:test, "'")
+	text shift(test, -8)
+	println("shift -3:\n'", s:test, "'")
+	text trimc(test, '.')
+	println("shift -3:\n'", s:test, "'")
 end

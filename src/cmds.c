@@ -102,10 +102,11 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 
 		_add(VOID TEXT "trimc(char* s%sconst uint l%suint* i%sconst %s e%sconst char c%s{", co,co,co,bool8,co,pc) d++;
 		_add("if (!s || !l || !i || !c) return;")
-		_add("if (e) {") d++;
+		_add("if (e == 1 || e == 2) {") d++;
 		_add("while (*i > 0 && s[*i - 1] == c) (*i)--;")
 		_add("s[*i] = %s;", cz)
-		d--; _add("} else {") d++;
+		d--; _add("}");
+		_add("if (e == 0 || e == 2) {") d++;
 		_add("uint n = 0;")
 		_add("while (s[n] && s[n] == c) n++;")
 		_add("if (!n) return;")
@@ -126,7 +127,7 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 	}
 }
 __cmd(text) { __cu(1, MAX_ARGS, "cmd(<str_name>, ...)")
-	if (strIs(argv[1], "add")) { __cu(2, 2, "add(<str_name>, ...)")
+	if (strIs(argv[1], "add")) { __cu(2, 2, "add(<str_name>, <text>)")
 		const uint l = strLen(argv[3]) - 2;
 		if (argv[3][0] == '\"') strShiftLeft(argv[3], sizeof(argv[3]), 1);
 		if (argv[3][l] == '\"') argv[3][l] = '\0';
@@ -134,6 +135,7 @@ __cmd(text) { __cu(1, MAX_ARGS, "cmd(<str_name>, ...)")
 		else _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s\"%s\");", argv[1],argv[2],co,argv[2],co,argv[2],co,argv[3])
 	}
 	else if (strIs(argv[1], "shift")) _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s);", argv[1],argv[2],co,argv[2],co,argv[2],co,argv[3])
+	else if (strIs(argv[1], "trimc")) _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s%s%s);", argv[1],argv[2],co,argv[2],co,argv[2],co,"2",co,argv[3])
 }
 
 __cmd(usec) { __cu(1, 1, "(<C_code>)")
