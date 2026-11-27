@@ -151,8 +151,8 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		_add("return %s;", bfa)
 		d--; _add("}")
 
-		_add(VOID TEXT "copy(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
-		_add("")
+		_add(VOID TEXT "copy(char* s%sconst uint l%sconst char* v%sconst uint vl%suint* vi%s{", co,co,co,co,pc) d++;
+		_add("if (!s || !l || !v || !vl || !vi) return;")
 		_add("")
 		_add("")
 		d--; _add("}")
