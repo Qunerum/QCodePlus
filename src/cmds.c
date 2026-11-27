@@ -119,7 +119,29 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		d--; _add("}")
 		d--; _add("}")
 
+		_add(VOID TEXT "replace(char* s%sconst uint l%suint* i%sconst char* a%sconst char* b%s{", co,co,co,co,pc) d++;
+		_add("if (!s || !l || !i || !a) return;")
+		_add("if (!b) b = "";
+		_add("")
+		_add("")
+		_add("")
+		_add("")
+		_add("")
+		d--; _add("}")
+
 		_add(VOID TEXT "a(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
+		_add("")
+		_add("")
+		_add("")
+		d--; _add("}")
+
+		_add(VOID TEXT "b(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
+		_add("")
+		_add("")
+		_add("")
+		d--; _add("}")
+
+		_add(VOID TEXT "c(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
 		_add("")
 		_add("")
 		_add("")
