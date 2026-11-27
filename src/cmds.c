@@ -59,6 +59,7 @@ static void parseArg(const uint start, const uint argc, char argv[MAX_ARGS][MAX_
 }
 
 #define VOID "static void "
+#define VST "static state "
 #define TEXT "__qcp_text_"
 __cmd(use) { __cu(1, 1, "(<lib_name>)")
 	if (strIs(argv[2], "text")) {
@@ -119,16 +120,20 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		d--; _add("}")
 		d--; _add("}")
 
-		_add(VOID TEXT startWith"(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
-		_add("")
-		_add("")
-		_add("")
+		_add(VST TEXT startWith"(char* s%sconst char* v%s{", co,pc) d++;
+		_add("if (!s || !v) return;")
+		_add("while (*v) {") d++;
+		_add("if (*s != *p) return %s", bfa)
+		_add("s++;")
+		_add("p++;")
+		d--; _add("}")
+		_add("return %s;", btr);
 		d--; _add("}")
 
-		_add(VOID TEXT "endWith(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
-		_add("")
-		_add("")
-		_add("")
+		_add(VST TEXT "endWith(char* s%sconst uint l%sconst char* v%sconst uint vl%s{", co,co,co,pc) d++;
+		_add("if (!s || !v || vl > l) return %s;", bfa)
+		_add("const char* a = s + (l - vl);")
+		_add("return 1; /* is */")
 		d--; _add("}")
 
 		_add(VOID TEXT "contains(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
