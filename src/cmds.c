@@ -101,21 +101,21 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		d--; _add("}")
 
 		_add(VOID TEXT "trimc(char* s%sconst uint l%suint* i%sconst %s e%sconst char c%s{", co,co,co,bool8,co,pc) d++;
-		_add("if (!s || !l || !i || !c) return;")
-		_add("if (e == 1 || e == 2) {") d++;
-		_add("while (*i > 0 && s[*i - 1] == c) (*i)--;")
-		_add("s[*i] = %s;", cz)
+		_add("if%s!s%s!l%s!i%s!c%sreturn;", po,or,or,or,pc)
+		_add("if%se%s1%se%s2%s{", po,is,or,is,pc) d++;
+		_add("while%s*i%s0%ss[*i%s1]%sc%s(*i)--;", po,lt,and,sub,is,pc)
+		_add("s[*i]%s%s;", eq,cz)
 		d--; _add("}");
-		_add("if (e == 0 || e == 2) {") d++;
-		_add("uint n = 0;")
-		_add("while (s[n] && s[n] == c) n++;")
-		_add("if (!n) return;")
-		_add("uint m = 0;")
-		_add("while (s[n + m]) {") d++;
-		_add("s[m] = s[n + m];")
+		_add("if%se%s0%se%s2%s{", po,is,or,is,pc) d++;
+		_add("uint n%s0;", eq)
+		_add("while%ss[n]%ss[n]%sc%sn++;", po,and,is,pc)
+		_add("if%s!n%sreturn;", po,pc)
+		_add("uint m%s0;", eq)
+		_add("while%ss[n%sm]%s{", po,add,pc) d++;
+		_add("s[m]%ss[n%sm];", eq,add)
 		_add("m++;")
 		d--; _add("}")
-		_add("s[m] = %s;", cz)
+		_add("s[m]%s%s;", eq,cz)
 		d--; _add("}")
 		d--; _add("}")
 
