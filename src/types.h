@@ -32,8 +32,7 @@ typedef struct {
 
 extern state
 	rio, // remove stdio
-	mir, // make it readable
-	rac; // run after compilation
+	mir; // make it readable
 void errorHandler(const char* cmd, const char* usage);
 #define __cmd(name) static void _qcp_##name(uint argc, char argv[MAX_ARGS][MAX_LINE])
 #define __te(state, usage) { if (state) errorHandler(argv[0], usage); }
@@ -47,7 +46,7 @@ void errorHandler(const char* cmd, const char* usage);
 		else fprintf(out, line "\n", ##__VA_ARGS__); \
 	} else fprintf(out, line, ##__VA_ARGS__); \
 }
-#define _chk(c) strStartWith(argv[i], #c":")
+#define _chk(c) strStartWith(argv[i], #c ":")
 #define _ic_ (void)argc;
 #define _iv_ (void)argv;
 #define _ib_ (void)argc; (void)argv;

@@ -59,7 +59,6 @@ static void parseArg(const uint start, const uint argc, char argv[MAX_ARGS][MAX_
 }
 
 #define VOID "static void "
-#define VST "static state "
 #define TEXT "__qcp_text_"
 __cmd(use) { __cu(1, 1, "(<lib_name>)")
 	if (strIs(argv[2], "text")) {
@@ -75,6 +74,14 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		_add("if%s!s%s!l%s!i%s!v%sreturn;", po,or,or,or,pc)
 		_add("if%s!v%sv%s\"(null)\";", po, pc, eq)
 		_add("while%s*v%s" TEXT "addc(s%sl%si%s*v++%s;", po,pc,co,co,co,pc)
+		d--; _add("}")
+
+		_add(VOID TEXT "set(char* s%sconst uint l%suint* i%sconst char* v%s{", co,co,co,pc) d++;
+		_add("if%s!s%s!l%s!i%sreturn;", po,or,or,pc)
+		_add("s[0]%s%s;", eq,cz)
+		_add("*i%s0;", eq)
+		_add("if%s!v%sreturn;", po,pc)
+		_add(TEXT "add(s%sl%si%sv);", co,co,co)
 		d--; _add("}")
 
 		_add(VOID TEXT "shift(char* s%sconst uint l%suint* i%sconst int v%s{", co,co,co,pc) d++;
@@ -103,11 +110,11 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 
 		_add(VOID TEXT "trimc(char* s%sconst uint l%suint* i%sconst %s e%sconst char c%s{", co,co,co,bool8,co,pc) d++;
 		_add("if%s!s%s!l%s!i%s!c%sreturn;", po,or,or,or,pc)
-		_add("if%se%s1%se%s2%s{", po,is,or,is,pc) d++;
+		_add("if%se%s&%s1%s{", po,sp,sp,pc) d++;
 		_add("while%s*i%s0%ss[*i%s1]%sc%s(*i)--;", po,lt,and,sub,is,pc)
 		_add("s[*i]%s%s;", eq,cz)
 		d--; _add("}");
-		_add("if%se%s0%se%s2%s{", po,is,or,is,pc) d++;
+		_add("if%se%s&%s2%s{", po,sp,sp,pc) d++;
 		_add("uint n%s0;", eq)
 		_add("while%ss[n]%ss[n]%sc%sn++;", po,and,is,pc)
 		_add("if%s!n%sreturn;", po,pc)
@@ -120,76 +127,124 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		d--; _add("}")
 		d--; _add("}")
 
-		_add(VST TEXT startWith"(const char* s%sconst char* v%s{", co,pc) d++;
-		_add("if (!s || !v) return;")
-		_add("while (*v) {") d++;
-		_add("if (*s != *p) return %s", bfa)
+		_add(VOID TEXT "trim(char* s%sconst uint l%suint* i%sconst %s e%s{", co,co,co,bool8,pc) d++;
+		_add("if%s!s%s!l%s!i%sreturn;", po,or,or,pc)
+		_add("if%s*i%sl%s*i%sl%s1;", po,goe,pc,eq,sub)
+		_add("s[*i]%s%s;", eq,cz)
+		_add("if%se%s&%s1%s{", po,sp,sp,pc) d++;
+		_add("while%s*i%s0%s(s[*i%s1]%s' '%ss[*i%s1]%s'\\n'%ss[*i%s1]%s'\\t'%ss[*i%s1]%s'\\r')%s(*i)--;", po,gt,and,sub,is,or,sub,is,or,sub,is,or,sub,is,pc)
+		_add("s[*i]%s%s;", eq,cz)
+		d--; _add("}")
+		_add("if%se%s&%s2%s{", po,sp,sp,pc) d++;
+		_add("uint n%s0;", eq)
+		_add("while%sn%s*i%ss[n]%s(s[n]%s' '%ss[n]%s'\\n'%ss[n]%s'\\t'%ss[n]%s'\\r')%sn++;", po,lt,and,and,is,or,is,or,is,or,is,pc)
+		_add("if%s!n%sreturn;", po,pc)
+		_add("uint m%s0;", eq)
+		_add("while%sn%sm%s*i%ss[n%sm]%s{", po,add,lt,and,add,pc) d++;
+		_add("s[m]%ss[n%sm];", eq,add)
+		_add("m++;")
+		d--; _add("}")
+		_add("s[m]%s%s;", eq,cz)
+		_add("*i%sm;", eq)
+		d--; _add("}")
+		d--; _add("}")
+
+		_add("static %s " TEXT "startWith(const char* s%sconst char* v%s{", bool8,co,pc) d++;
+		_add("if%s!s%s!v%sreturn %s;", po,or,pc,bfa)
+		_add("while%s*v%s{", po,pc) d++;
+		_add("if%s*s%s*v%sreturn %s;", po,isn,pc,bfa)
 		_add("s++;")
-		_add("p++;")
+		_add("v++;")
 		d--; _add("}")
-		_add("return %s;", btr);
-		d--; _add("}")
-
-		_add(VST TEXT "endWith(const char* s%sconst uint l%sconst char* v%sconst uint vl%s{", co,co,co,pc) d++;
-		_add("if (!s || !v || vl > l) return %s;", bfa)
-		_add("const char* a = s + (l - vl);")
-		_add("return 1; /* is */")
+		_add("return %s;", btr)
 		d--; _add("}")
 
-		_add(VST TEXT "contains(const char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
-		_add("if (!s || !v) return %s;", bfa)
-		_add("if (!(*v)) return %s;", btr)
-		_add("while (*s) {") d++;
-		_add("const char *a = s, *b = v;")
-		_add("while (*a && *b && *a == *b) {") d++;
+		_add("static %s " TEXT "endWith(const char* s%sconst uint l%sconst char* v%sconst uint vl%s{", bool8,co,co,co,pc) d++;
+		_add("if%s!s%s!v%svl%sl%sreturn %s;", po,or,or,gt,pc,bfa)
+		_add("const char* a%ss%s(l%svl);", eq,add,sub)
+		_add("while%s*v%s{", po,pc) d++;
+		_add("if%s*a%s*v%sreturn %s;", po,isn,pc,bfa)
+		_add("a++;")
+		_add("v++;")
+		d--; _add("}")
+		_add("return %s;", btr)
+		d--; _add("}")
+
+		_add("static %s " TEXT "contains(const char* s%sconst char* v%s{", bool8,co,pc) d++;
+		_add("if%s!s%s!v%sreturn %s;", po,or,pc,bfa)
+		_add("if%s!(*v)%sreturn %s;", po,pc,btr)
+		_add("while%s*s%s{", po,pc) d++;
+		_add("const char *a%ss%s*b%sv;", eq,co,eq)
+		_add("while%s*a%s*b%s*a%s*b%s{", po,and,and,is,pc) d++;
 		_add("a++;")
 		_add("b++;")
 		d--; _add("}")
-		_add("if (!(*b)) return %s;", btr)
+		_add("if%s!(*b)%sreturn %s;", po,pc,btr)
 		_add("s++;")
 		d--; _add("}")
 		_add("return %s;", bfa)
 		d--; _add("}")
 
-		_add(VOID TEXT "copy(char* s%sconst uint l%sconst char* v%sconst uint vl%suint* vi%s{", co,co,co,co,pc) d++;
-		_add("if (!s || !l || !v || !vl || !vi) return;")
-		_add("")
-		_add("")
+		_add("static int " TEXT "find(const char* s%sconst char c%s{", co,pc) d++;
+		_add("if%s!s%sreturn -1;", po,pc)
+		_add("for%suint i%s0;%ss[i];%si++%sif%ss[i]%sc%sreturn (int)i;", po,eq,sp,sp,pc,po,is,pc)
+		_add("return -1;")
+		d--; _add("}")
+
+		_add(VOID TEXT "upper(char* s%s{", pc) d++;
+		_add("if%s!s%sreturn;", po,pc)
+		_add("for%suint i%s0;%ss[i];%si++%sif%s'a'%ss[i]%ss[i]%s'z'%ss[i]%s-=%s32;", po,eq,sp,sp,pc,po,loe,and,loe,pc,sp,sp)
+		d--; _add("}")
+
+		_add(VOID TEXT "lower(char* s%s{", pc) d++;
+		_add("if%s!s%sreturn;", po,pc)
+		_add("for%suint i%s0;%ss[i];%si++%sif%s'A'%ss[i]%ss[i]%s'Z'%ss[i]%s+=%s32;", po,eq,sp,sp,pc,po,loe,and,loe,pc,sp,sp)
 		d--; _add("}")
 
 		_add(VOID TEXT "replace(char* s%sconst uint l%suint* i%sconst char* a%sconst uint al%sconst char* b%sconst uint bl%s{", co,co,co,co,co,co,pc) d++;
-		_add("if (!s || !l || !i || !a || !al || al > l) return;")
-		_add("if (!b) b = "";
-		_add("/* contains */")
-		_add("const int d = (int)bl - (int)al;")
-		_add("uint n = 0;")
-		_add("while (s[n]) {") d++;
-		_add("if (1 /* start with */) {") d++;
+		_add("if%s!s%s!l%s!i%s!a%s!al%sal%sl%s!" TEXT "contains(s%sa)%sreturn;", po,or,or,or,or,or,goe,or,co,pc)
+		_add("if%s!b%sb%s\"\";", po,pc,eq)
+		_add("if%s*i%sl%s*i%sl%s1;", po,goe,pc,eq,sub)
+		_add("s[*i]%s%s;", eq,cz)
+		_add("const int d%s(int)bl%s(int)al;", eq,sub)
+		_add("uint n%s0;", eq)
+		_add("while%sn%s*i%ss[n]%s{", po,lt,and,pc) d++;
+		_add("if%s" TEXT "startWith(&s[n]%sa)%s{", po,co,pc) d++;
+		_add("if%sd%s0%s{", po,gt,pc) d++;
+		_add("uint m%s(*i%sn)%s?%s(*i%sn)%s:%s0;", eq,gt,sp,sp,sub,sp,sp)
+		_add(TEXT "shift(&s[n]%sl%sn%s&m%sd);", co,sub,co,co)
+		_add("*i%sn%sm;", eq,add)
+		d--; _add("}%selse if%sd%s0%s{", sp,po,lt,pc) d++;
+		_add("const uint m%s(uint)(-d);", eq)
+		_add("uint o%sn%sbl;", eq,add)
+		_add("while%so%sm%s*i%ss[o%sm]%s{", po,add,lt,and,add,pc) d++;
+		_add("s[o]%ss[o%sm];", eq,add)
+		_add("o++;")
+		d--; _add("}")
+		_add("s[o]%s%s;", eq,cz)
+		_add("*i%so;", eq)
+		d--; _add("}")
+		_add("for%suint j%s0;%sj%sbl%sn%sj%sl%s1;%sj++%ss[n%sj]%sb[j];", po,eq,sp,lt,and,add,lt,sub,sp,pc,add,eq)
+		_add("if%s*i%sn%sbl%sn%sbl%sl%s*i%sn%sbl;", po,lt,add,and,add,lt,pc,eq,add)
+		_add("s[*i]%s%s;", eq,cz)
+		_add("n%s+=%sbl;", sp,sp)
+		d--; _add("}%selse n++;", sp)
 		d--; _add("}")
 		d--; _add("}")
-		_add("")
-		_add("")
-		_add("")
+
+		_add(VOID TEXT "toInt(const char* s%s{", pc) d++;
 		_add("")
 		d--; _add("}")
 
-		_add(VOID TEXT "a(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
-		_add("")
-		_add("")
+		_add(VOID TEXT "isNum(const char* s%s{", pc) d++;
 		_add("")
 		d--; _add("}")
 
-		_add(VOID TEXT "b(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
-		_add("")
-		_add("")
-		_add("")
-		d--; _add("}")
-
-		_add(VOID TEXT "c(char* s%sconst uint l%suint* i%s{", co,co,pc) d++;
-		_add("")
-		_add("")
-		_add("")
-		d--; _add("}")
+		// _add(VOID TEXT "(char* s%s{", pc) d++;
+		// _add("")
+		// _add("")
+		// _add("")
+		// d--; _add("}")
 	}
 }
 __cmd(text) { __cu(1, MAX_ARGS, "cmd(<str_name>, ...)")
@@ -202,6 +257,7 @@ __cmd(text) { __cu(1, MAX_ARGS, "cmd(<str_name>, ...)")
 	}
 	else if (strIs(argv[1], "shift")) _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s);", argv[1],argv[2],co,argv[2],co,argv[2],co,argv[3])
 	else if (strIs(argv[1], "trimc")) _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s%s%s);", argv[1],argv[2],co,argv[2],co,argv[2],co,"2",co,argv[3])
+	else if (strIs(argv[1], "trim")) _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s);", argv[1],argv[2],co,argv[2],co,argv[2],co,"3")
 }
 
 __cmd(usec) { __cu(1, 1, "(<C_code>)")

@@ -13,5 +13,7 @@ func main()
 	text shift(test, -8)
 	println("shift -3:\n'", s:test, "'")
 	text trimc(test, '.')
-	println("shift -3:\n'", s:test, "'")
+	println("trimc '.':\n'", s:test, "'")
+	text trim(test)
+	println("trim:\n'", s:test, "'")
 end
