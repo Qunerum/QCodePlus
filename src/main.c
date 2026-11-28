@@ -209,23 +209,25 @@ int main(int argc, char **argv) {
 	}
 	fclose(in);
 	fclose(out);
-	char cmd[MAX_LINE * 3];
-	snprintf(cmd, sizeof(cmd), "%s -O2 -ffunction-sections -fdata-sections -c \"%s\" -o \"%s\"", ccp, cPath, oPath);
-	const int to = system(cmd) == 0;
-	snprintf(cmd, sizeof(cmd), "%s \"%s\" -Wl,--gc-sections -s -o \"%s\"", ccp, oPath, ePath);
-	const int tf = system(cmd) == 0;
-	if (!(to && tf)) {
-		if (cie) {
-			remove(cPath);
-			remove(oPath);
+	if (!dmo) {
+		char cmd[MAX_LINE * 3];
+		snprintf(cmd, sizeof(cmd), "%s -O2 -ffunction-sections -fdata-sections -c \"%s\" -o \"%s\"", ccp, cPath, oPath);
+		const int to = system(cmd) == 0;
+		snprintf(cmd, sizeof(cmd), "%s \"%s\" -Wl,--gc-sections -s -o \"%s\"", ccp, oPath, ePath);
+		const int tf = system(cmd) == 0;
+		if (!(to && tf)) {
+			if (cie) {
+				remove(cPath);
+				remove(oPath);
+			}
+			return 5;
 		}
-		return 5;
-	}
-	if (rcf) remove(cPath);
-	if (rac) {
-		char run_cmd[MAX_LINE + 64];
-		snprintf(run_cmd, sizeof(run_cmd), "./%s", ePath);
-		system(run_cmd);
+		if (rcf) remove(cPath);
+		if (rac) {
+			char run_cmd[MAX_LINE + 64];
+			snprintf(run_cmd, sizeof(run_cmd), "./%s", ePath);
+			system(run_cmd);
+		}
 	}
 	return 0;
 }

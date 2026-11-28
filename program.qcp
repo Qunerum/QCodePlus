@@ -1,6 +1,5 @@
 use(text)
 
-int x(0)
 func main()
 	str test(64, "Hello")
 	for(i, 4)
@@ -10,10 +9,41 @@ func main()
 	println(s:test)
 	text shift(test, 2)
 	println("shift 2:\n'", s:test, "'")
+
 	text shift(test, -8)
 	println("shift -3:\n'", s:test, "'")
-	text trimc(test, '.')
+
+	text trimc(test, '.', both)
 	println("trimc '.':\n'", s:test, "'")
-	text trim(test)
+
+	bool8 x()
+
+	text trim(test, both)
 	println("trim:\n'", s:test, "'")
+
+	text startWith(test, x, 0, "...")
+	println("startWith: ", b:x'8)
+
+	text endWith(test, x, 1, "...")
+	println("endWith: ", b:x'8)
+
+	text add(test, "Abc")
+	println("add 'abc':\n'", s:test, "'")
+
+	text contains(test, x, 2, "...Abc")
+	println("contains '...Abc': ", b:x'8)
+
+	int y()
+
+	text find(test, y, ' ')
+	println("find ' ': ", i:y)
+
+	text upper(test)
+	println("upper:\n'", s:test, "'")
+
+	text lower(test)
+	println("lower:\n'", s:test, "'")
+
+	text replace(test, "...a", "<Hello> ")
+	println("replace '...a' -> '<Hello> ':\n'", s:test, "'")
 end

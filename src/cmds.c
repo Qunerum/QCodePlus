@@ -21,6 +21,7 @@ extern char
 	po[3], pc[3],  //  ( )
 	add[4],sub[4]; //  + -
 
+#define a(i) argv[i]
 static void _pv_add(char* s, const uint len, uint* ci, uint* ai, const char m) {
 	strShiftLeft(s, len, 2);
 	const int j = strFind(s, '\'');
@@ -40,28 +41,27 @@ static void parseArg(const uint start, const uint argc, char argv[MAX_ARGS][MAX_
 	a[0] = '\0';
 	uint ci = 0, ai = 0;
 	for (uint i = start; i < argc; i++) {
-		const uint len = strLen(argv[i]) + 1;
-		if (argv[i][0] == '"') {
-			strShiftRight(argv[i], len, 1);
-			strShiftLeft(argv[i], len, 2);
-			strReplace(argv[i], sizeof(argv[i]), "%", "%%");
-			strAddStr(c, sizeof(c), &ci, argv[i]);
-		} else if (isNum(argv[i])) strAddStr(c, sizeof(c), &ci, argv[i]);
-		else if (_chk(i)) _pv_add(argv[i], len, &ci, &ai, 'i');
-		else if (_chk(u)) _pv_add(argv[i], len, &ci, &ai, 'u');
-		else if (_chk(f)) _pv_add(argv[i], len, &ci, &ai, 'f');
-		else if (_chk(b)) _pv_add(argv[i], len, &ci, &ai, 'b');
-		else if (_chk(h)) _pv_add(argv[i], len, &ci, &ai, 'x');
-		else if (_chk(H)) _pv_add(argv[i], len, &ci, &ai, 'X');
-		else if (_chk(o)) _pv_add(argv[i], len, &ci, &ai, 'o');
-		else if (_chk(s)) _pv_add(argv[i], len, &ci, &ai, 's');
+		const uint len = strLen(a(i)) + 1;
+		if (a(i)[0] == '"') {
+			strShiftRight(a(i), len, 1);
+			strShiftLeft(a(i), len, 2);
+			strReplace(a(i), sizeof(a(i)), "%", "%%");
+			strAddStr(c, sizeof(c), &ci, a(i));
+		} else if (isNum(a(i))) strAddStr(c, sizeof(c), &ci, a(i));
+		else if (_chk(i)) _pv_add(a(i), len, &ci, &ai, 'i');
+		else if (_chk(u)) _pv_add(a(i), len, &ci, &ai, 'u');
+		else if (_chk(f)) _pv_add(a(i), len, &ci, &ai, 'f');
+		else if (_chk(b)) _pv_add(a(i), len, &ci, &ai, 'b');
+		else if (_chk(h)) _pv_add(a(i), len, &ci, &ai, 'x');
+		else if (_chk(H)) _pv_add(a(i), len, &ci, &ai, 'X');
+		else if (_chk(o)) _pv_add(a(i), len, &ci, &ai, 'o');
+		else if (_chk(s)) _pv_add(a(i), len, &ci, &ai, 's');
 	}
 }
-
 #define VOID "static void "
 #define TEXT "__qcp_text_"
 __cmd(use) { __cu(1, 1, "(<lib_name>)")
-	if (strIs(argv[2], "text")) {
+	if (strIs(a(2), "text")) {
 		_add(VOID TEXT "addc(char* s%sconst uint l%suint* i%sconst char v%s{", co,co,co,pc) d++;
 		_add("if%s!s%s!l%s!i%s!v%sreturn;", po,or,or,or,pc)
 		_add("if%s*i%sl%s1%s{", po,lt,sub,pc) d++;
@@ -71,7 +71,7 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		d--; _add("}")
 
 		_add(VOID TEXT "add(char* s%sconst uint l%suint* i%sconst char* v%s{", co,co,co,pc) d++;
-		_add("if%s!s%s!l%s!i%s!v%sreturn;", po,or,or,or,pc)
+		_add("if%s!s%s!l%s!i%sreturn;", po,or,or,pc)
 		_add("if%s!v%sv%s\"(null)\";", po, pc, eq)
 		_add("while%s*v%s" TEXT "addc(s%sl%si%s*v++%s;", po,pc,co,co,co,pc)
 		d--; _add("}")
@@ -86,7 +86,7 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 
 		_add(VOID TEXT "shift(char* s%sconst uint l%suint* i%sconst int v%s{", co,co,co,pc) d++;
 		_add("if%s!s%s!l%s!i%s!v%sreturn;", po,or,or,or,pc)
-		_add("const int r%sv%s0%s?%s-v%s:%sv;", eq,lt,sp,sp,sp,sp)
+		_add("const uint r%sv%s0%s?%s-v%s:%sv;", eq,lt,sp,sp,sp,sp)
 		_add("if%sv%s0%s{", po,gt,pc) d++;
 		_add("for%sint c%s*i;%sc%s0;%sc--%s{", po,eq,sp,goe,sp,pc) d++;
 		_add("const uint n%sc%s+%sr;", eq,sp,sp)
@@ -109,26 +109,30 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		d--; _add("}")
 
 		_add(VOID TEXT "trimc(char* s%sconst uint l%suint* i%sconst %s e%sconst char c%s{", co,co,co,bool8,co,pc) d++;
-		_add("if%s!s%s!l%s!i%s!c%sreturn;", po,or,or,or,pc)
+		_add("if%s!s%s!l%s!i%s!e%s!c%sreturn;", po,or,or,or,or,pc)
+		_add("if%s*i%sl%s*i%sl%s1;", po,goe,pc,eq,sub)
+		_add("s[*i]%s%s;", eq,cz)
 		_add("if%se%s&%s1%s{", po,sp,sp,pc) d++;
-		_add("while%s*i%s0%ss[*i%s1]%sc%s(*i)--;", po,lt,and,sub,is,pc)
+		_add("while%s*i%s0%ss[*i%s1]%sc%s(*i)--;", po,gt,and,sub,is,pc)
 		_add("s[*i]%s%s;", eq,cz)
 		d--; _add("}");
 		_add("if%se%s&%s2%s{", po,sp,sp,pc) d++;
 		_add("uint n%s0;", eq)
-		_add("while%ss[n]%ss[n]%sc%sn++;", po,and,is,pc)
-		_add("if%s!n%sreturn;", po,pc)
+		_add("while%sn%s*i%ss[n]%sc%sn++;", po,lt,and,is,pc)
+		_add("if%sn%s0%s{", po,gt,pc) d++;
 		_add("uint m%s0;", eq)
-		_add("while%ss[n%sm]%s{", po,add,pc) d++;
+		_add("while%sn%sm%s*i%s{", po,add,lt,pc) d++;
 		_add("s[m]%ss[n%sm];", eq,add)
 		_add("m++;")
 		d--; _add("}")
 		_add("s[m]%s%s;", eq,cz)
+		_add("*i%sm;", eq)
+		d--; _add("}")
 		d--; _add("}")
 		d--; _add("}")
 
 		_add(VOID TEXT "trim(char* s%sconst uint l%suint* i%sconst %s e%s{", co,co,co,bool8,pc) d++;
-		_add("if%s!s%s!l%s!i%sreturn;", po,or,or,pc)
+		_add("if%s!s%s!l%s!i%s!e%sreturn;", po,or,or,or,pc)
 		_add("if%s*i%sl%s*i%sl%s1;", po,goe,pc,eq,sub)
 		_add("s[*i]%s%s;", eq,cz)
 		_add("if%se%s&%s1%s{", po,sp,sp,pc) d++;
@@ -138,7 +142,7 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		_add("if%se%s&%s2%s{", po,sp,sp,pc) d++;
 		_add("uint n%s0;", eq)
 		_add("while%sn%s*i%ss[n]%s(s[n]%s' '%ss[n]%s'\\n'%ss[n]%s'\\t'%ss[n]%s'\\r')%sn++;", po,lt,and,and,is,or,is,or,is,or,is,pc)
-		_add("if%s!n%sreturn;", po,pc)
+		_add("if%sn%s0%s{", po,gt,pc) d++;
 		_add("uint m%s0;", eq)
 		_add("while%sn%sm%s*i%ss[n%sm]%s{", po,add,lt,and,add,pc) d++;
 		_add("s[m]%ss[n%sm];", eq,add)
@@ -146,6 +150,7 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		d--; _add("}")
 		_add("s[m]%s%s;", eq,cz)
 		_add("*i%sm;", eq)
+		d--; _add("}")
 		d--; _add("}")
 		d--; _add("}")
 
@@ -247,35 +252,78 @@ __cmd(use) { __cu(1, 1, "(<lib_name>)")
 		// d--; _add("}")
 	}
 }
+static uint8 getS(const char* s) { return
+	strIs(s, "right") ? 1 :
+	strIs(s, "left") ? 2 :
+	strIs(s, "both") ? 3 : 0;
+}
 __cmd(text) { __cu(1, MAX_ARGS, "cmd(<str_name>, ...)")
-	if (strIs(argv[1], "add")) { __cu(2, 2, "add(<str_name>, <text>)")
-		const uint l = strLen(argv[3]) - 2;
-		if (argv[3][0] == '\"') strShiftLeft(argv[3], sizeof(argv[3]), 1);
-		if (argv[3][l] == '\"') argv[3][l] = '\0';
-		if (l == 1 || (l == 2 && argv[3][0] == '\\')) _add(TEXT "addc(%s%ssizeof(%s)%s&__str_%s%s'%s');", argv[2],co,argv[2],co,argv[2],co,argv[3])
-		else _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s\"%s\");", argv[1],argv[2],co,argv[2],co,argv[2],co,argv[3])
+	if (strIs(a(1), "add")) {
+		const uint l = strLen(a(3)) - 2;
+		if (a(3)[0] == '\"') strShiftLeft(a(3), sizeof(a(3)), 1);
+		if (a(3)[l] == '\"') a(3)[l] = '\0';
+		if (l == 1 || (l == 2 && a(3)[0] == '\\')) _add(TEXT "addc(%s%ssizeof(%s)%s&__str_%s%s'%s');", a(2),co,a(2),co,a(2),co,a(3))
+		else _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s\"%s\");", a(1),a(2),co,a(2),co,a(2),co,a(3))
+		return;
 	}
-	else if (strIs(argv[1], "shift")) _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s);", argv[1],argv[2],co,argv[2],co,argv[2],co,argv[3])
-	else if (strIs(argv[1], "trimc")) _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s%s%s);", argv[1],argv[2],co,argv[2],co,argv[2],co,"2",co,argv[3])
-	else if (strIs(argv[1], "trim")) _add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s);", argv[1],argv[2],co,argv[2],co,argv[2],co,"3")
+	if (strIs(a(1), "shift")) {
+		_add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s);", a(1),a(2),co,a(2),co,a(2),co,a(3))
+		return;
+	}
+	if (strIs(a(1), "trimc")) {
+		_add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%u%s%s);", a(1),a(2),co,a(2),co,a(2),co,getS(a(4)),co,a(3))
+		return;
+	}
+	if (strIs(a(1), "trim")) {
+		_add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%u);", a(1),a(2),co,a(2),co,a(2),co,getS(a(3)))
+		return;
+	}
+	if (strIs(a(1), "startWith")) {
+		_add("%s%s" TEXT "%s(%s%s%s)%s%s;", a(3),oe,a(1),a(2),co,a(5),sl,a(4))
+		return;
+	}
+	if (strIs(a(1), "endWith")) {
+		_add("%s%s" TEXT "%s(%s%s__str_%s%s%s%s%u)%s%s;", a(3),oe,a(1),a(2),co,a(2),co,a(5),co,strLen(a(5))-2,sl,a(4))
+		return;
+	}
+	if (strIs(a(1), "contains")) {
+		_add("%s%s" TEXT "%s(%s%s%s)%s%s;", a(3),oe,a(1),a(2),co,a(5),sl,a(4))
+		return;
+	}
+	if (strIs(a(1), "find")) {
+		_add("%s%s" TEXT "%s(%s%s%s);", a(3),eq,a(1),a(2),co,a(4))
+		return;
+	}
+	if (strIs(a(1), "upper")) {
+		_add(TEXT "%s(%s);", a(1),a(2))
+		return;
+	}
+	if (strIs(a(1), "lower")) {
+		_add(TEXT "%s(%s);", a(1),a(2))
+		return;
+	}
+	if (strIs(a(1), "replace")) {
+		_add(TEXT "%s(%s%ssizeof(%s)%s&__str_%s%s%s%s%u%s%s%s%u);", a(1),a(2),co,a(2),co,a(2),co,a(3),co,strLen(a(3))-2,co,a(4),co,strLen(a(4))-2)
+		return;
+	}
 }
 
 __cmd(usec) { __cu(1, 1, "(<C_code>)")
-	const uint l = strLen(argv[2]) + 1;
-	if (argv[2][l - 2] == '\"') argv[2][l - 2] = '\0';
-	if (argv[2][0] == '\"') strShiftLeft(argv[2], l, 1);
-	if (argv[2][0] == '#') {
+	const uint l = strLen(a(2)) + 1;
+	if (a(2)[l - 2] == '\"') a(2)[l - 2] = '\0';
+	if (a(2)[0] == '\"') strShiftLeft(a(2), l, 1);
+	if (a(2)[0] == '#') {
 		if (!mir) _add("\n");
-		_add("%s\n", argv[2])
+		_add("%s\n", a(2))
 		return;
 	}
-	if (!mir && (strStartWith(argv[2], "//") || strStartWith(argv[2], "/*") || strEndWith(argv[2], "*/"))) return;
-	_add("%s", argv[2])
+	if (!mir && (strStartWith(a(2), "//") || strStartWith(a(2), "/*") || strEndWith(a(2), "*/"))) return;
+	_add("%s", a(2))
 }
 
 __cmd(setprt) { __cu(1, 1, "(print_void_name)")
-	_add("extern void %s(const char* format, ...);", argv[2])
-	strCopy(prt, argv[2]);
+	_add("extern void %s(const char* format, ...);", a(2))
+	strCopy(prt, a(2));
 }
 __cmd(println) {
 	parseArg(2, argc, argv);
@@ -286,25 +334,28 @@ __cmd(print) {
 	_add("%s(\"%s\"%s);", prt, c, a)
 }
 
-__cmd(int) { __cu(1, 1, "<name>(<value>)") _add("int %s%s%s;", argv[1], eq, argv[2]) }
-__cmd(uint) { __cu(1, 1, "<name>(<value>)") _add("uint %s%s%s;", argv[1], eq, argv[2]) }
-__cmd(float) { __cu(1, 1, "<name>(<value>)")
-	const state hd = strContains(argv[2], "."), hf = strEndWith(argv[2], "f");
-	if (hd && hf) _add("%s %s%s%s;", argv[0], argv[1], eq, argv[2])
-	else if (hd && !hf) _add("%s %s%s%sf;", argv[0], argv[1], eq, argv[2])
-	else if (!hd) {
-		if (hf) argv[2][strLen(argv[2]) - 1] = '\0';
-		_add("float %s%s%s.0f;", argv[1], eq, argv[2])
+__cmd(int) { __cu(0, 1, "<name>([value])") _add("int %s%s%s;", a(1), eq, argc == 3 ? a(2) : "0") }
+__cmd(uint) { __cu(0, 1, "<name>([value])") _add("uint %s%s%s;", a(1), eq, argc == 3 ? a(2) : "0") }
+__cmd(float) { __cu(0, 1, "<name>([value])")
+	if (argc == 2) _add("float %s%s0.0f;", a(1), eq)
+	else {
+		const state hd = strContains(a(2), "."), hf = strEndWith(a(2), "f");
+		if (hd && hf) _add("%s %s%s%s;", a(0), a(1), eq, a(2))
+		else if (hd && !hf) _add("%s %s%s%sf;", a(0), a(1), eq, a(2))
+		else if (!hd) {
+			if (hf) a(2)[strLen(a(2)) - 1] = '\0';
+			_add("float %s%s%s.0f;", a(1), eq, a(2))
+		}
 	}
 }
 __cmd(str) { __cu(1, 2, "<name>(<max_length>, [value])")
 	uint l = 0;
-	if (argc == 3) _add("char %s[%s];", argv[1], argv[2])
+	if (argc == 3) _add("char %s[%s];", a(1), a(2))
 	else if (argc == 4) {
-		l = strLen(argv[3]) - 2;
-		_add("char %s[%s]%s%s;", argv[1], argv[2], eq, argv[3])
+		l = strLen(a(3)) - 2;
+		_add("char %s[%s]%s%s;", a(1), a(2), eq, a(3))
 	}
-	_add("uint __str_%s%s%u;", argv[1], eq, l);
+	_add("uint __str_%s%s%u;", a(1), eq, l);
 }
 static void blRep(char* a) {
 	if (!mir) {
@@ -312,84 +363,84 @@ static void blRep(char* a) {
 		strReplace(a, MAX_LINE, "false", "0");
 	}
 }
-__cmd(bool64) { __cu(1, 1, "<name>(<value>)")
-	blRep(argv[2]);
-	_add("%s %s%s%s;", bool64, argv[1], eq, argv[2])
+__cmd(bool64) { __cu(0, 1, "<name>([value])")
+	if (argc == 3) blRep(a(2));
+	_add("%s %s%s%s;", bool64, a(1), eq, argc == 3 ? a(2) : bfa)
 }
-__cmd(bool32) { __cu(1, 1, "<name>(<value>)")
-	blRep(argv[2]);
-	_add("%s %s%s%s;", bool32, argv[1], eq, argv[2])
+__cmd(bool32) { __cu(0, 1, "<name>([value])")
+	blRep(a(2));
+	_add("%s %s%s%s;", bool32, a(1), eq, argc == 3 ? a(2) : bfa)
 }
-__cmd(bool16) { __cu(1, 1, "<name>(<value>)")
-	blRep(argv[2]);
-	_add("%s %s%s%s;", bool16, argv[1], eq, argv[2])
+__cmd(bool16) { __cu(0, 1, "<name>([value])")
+	blRep(a(2));
+	_add("%s %s%s%s;", bool16, a(1), eq, argc == 3 ? a(2) : bfa)
 }
-__cmd(bool8) { __cu(1, 1, "<name>(<value>)")
-	blRep(argv[2]);
-	_add("%s %s%s%s;", bool8, argv[1], eq, argv[2])
+__cmd(bool8) { __cu(0, 1, "<name>([value])")
+	blRep(a(2));
+	_add("%s %s%s%s;", bool8, a(1), eq, argc == 3 ? a(2) : bfa)
 }
 __cmd(perm) { __cu(2, 2, "<var_type>(<var_name>, <value>)")
-	if (!strIs(argv[1],   "int") &&
-		!strIs(argv[1], "float") &&
-		!strIs(argv[1], "bool8") &&
-		!strIs(argv[1],"bool16") &&
-		!strIs(argv[1],"bool32") &&
-		!strIs(argv[1],"bool64")
+	if (!strIs(a(1),   "int") &&
+		!strIs(a(1), "float") &&
+		!strIs(a(1), "bool8") &&
+		!strIs(a(1),"bool16") &&
+		!strIs(a(1),"bool32") &&
+		!strIs(a(1),"bool64")
 	) return;
 	if (!mir) {
-		strReplace(argv[3], sizeof(argv[3]), "true", "1");
-		strReplace(argv[3], sizeof(argv[3]), "false", "0");
+		strReplace(a(3), sizeof(a(3)), "true", "1");
+		strReplace(a(3), sizeof(a(3)), "false", "0");
 	}
-	_add("const %s %s%s%s;", argv[1], argv[2], eq, argv[3])
+	_add("const %s %s%s%s;", a(1), a(2), eq, a(3))
 }
 
-__cmd(set) { __cu(1, 1, "<var_name>(<new_value>)") _add("%s = %s;", argv[1], argv[2]) }
+__cmd(set) { __cu(1, 1, "<var_name>(<new_value>)") _add("%s = %s;", a(1), a(2)) }
 __cmd(setb) { __cu(2, 2, "<bool_list_name>(<bool_index>, <value>)")
-	if (strIs(argv[3], "false")) _add("%s%s~(%s%s%s);", argv[1], ae, bfa, sl, argv[2])
-	else if (strIs(argv[3], "true")) _add("%s%s%s%s%s;", argv[1], oe, btr, sl, argv[2])
+	if (strIs(a(3), "false")) _add("%s%s~(%s%s%s);", a(1), ae, bfa, sl, a(2))
+	else if (strIs(a(3), "true")) _add("%s%s%s%s%s;", a(1), oe, btr, sl, a(2))
 }
 __cmd(add) { __cu(1, 1, "<name>(<value>)")
-	if (strIs(argv[2], "1")) _add("%s++;", argv[1])
-	else _add("%s%s+=%s%s;", argv[1], sp, sp, argv[2])
+	if (strIs(a(2), "1")) _add("%s++;", a(1))
+	else _add("%s%s+=%s%s;", a(1), sp, sp, a(2))
 }
 __cmd(sub) { __cu(1, 1, "<name>(<value>)")
-	if (strIs(argv[2], "1")) _add("%s--;", argv[1])
-	else _add("%s%s-=%s%s;", argv[1], sp, sp, argv[2])
+	if (strIs(a(2), "1")) _add("%s--;", a(1))
+	else _add("%s%s-=%s%s;", a(1), sp, sp, a(2))
 }
-__cmd(mul) { __cu(1, 1, "<name>(<value>)") if (!strIs(argv[2], "1")) _add("%s%s*=%s%s;", argv[1], sp, sp, argv[2]) }
+__cmd(mul) { __cu(1, 1, "<name>(<value>)") if (!strIs(a(2), "1")) _add("%s%s*=%s%s;", a(1), sp, sp, a(2)) }
 __cmd(div) { __cu(1, 1, "<name>(<value>)")
-	__te(strIs(argv[2], "0"), "Cannot divide by zero!")
-	_add("%s%s/=%s%s;", argv[1], sp, sp, argv[2])
+	__te(strIs(a(2), "0"), "Cannot divide by zero!")
+	_add("%s%s/=%s%s;", a(1), sp, sp, a(2))
 }
 
 __cmd(if) { __cu(1, 1, "(<value>) {")
-	_add("if%s%s%s{", po, argv[2], pc)
+	_add("if%s%s%s{", po, a(2), pc)
 	d++;
 }
 __cmd(for) { __cu(2, 3, "(<var_name>, <repeat_count>)' or 'for (<var_name>, <start_at>, <end_at>)")
-	if (argc == 4) _add("for%sint %s%s0;%s%s%s%s;%s%s++%s{", po, argv[2], eq, sp, argv[2], lt, argv[3], sp, argv[2], pc)
-	else if (argc == 5) _add("for%sint %s%s%s;%si%s%s;%si++%s{", po, argv[2], eq, argv[3], sp, lt, argv[4], sp, pc)
+	if (argc == 4) _add("for%sint %s%s0;%s%s%s%s;%s%s++%s{", po, a(2), eq, sp, a(2), lt, a(3), sp, a(2), pc)
+	else if (argc == 5) _add("for%sint %s%s%s;%si%s%s;%si++%s{", po, a(2), eq, a(3), sp, lt, a(4), sp, pc)
 	d++;
 }
 __cmd(rep) {  __cu(1, 1, "(<repeat_count>)")
 	static uint r = 0;
 	r++;
 	uint s = 0;
-	strAddChar(argv[1], sizeof(argv[1]), &s, '_');
-	strAddStr(argv[1], sizeof(argv[1]), &s, "rep");
-	strAddNum(argv[1], sizeof(argv[1]), &s, r, 16);
-	strAddChar(argv[1], sizeof(argv[1]), &s, '_');
-	_add("for%suint %s%s0;%s%s%s%s;%s%s++%s{", po, argv[1], eq, sp, argv[1], lt, argv[2], sp, argv[1], pc)
+	strAddChar(a(1), sizeof(a(1)), &s, '_');
+	strAddStr(a(1), sizeof(a(1)), &s, "rep");
+	strAddNum(a(1), sizeof(a(1)), &s, r, 16);
+	strAddChar(a(1), sizeof(a(1)), &s, '_');
+	_add("for%suint %s%s0;%s%s%s%s;%s%s++%s{", po, a(1), eq, sp, a(1), lt, a(2), sp, a(1), pc)
 	d++;
 }
 __cmd(func) { __cu(0, MAX_ARGS, "<func_name>([args])")
-	if (strIs(argv[1], "main")) _add("int %s(%s{%s", argv[1], pc, rio ? "" : "putchar(0);")
-	else _add("void %s(%s{", argv[1], pc)
+	if (strIs(a(1), "main")) _add("int %s(%s{%s", a(1), pc, rio ? "" : "putchar(0);")
+	else _add("void %s(%s{", a(1), pc)
 	d++;
 }
 __cmd(run) { _ic_
-	_add("extern void %s();", argv[1])
-	_add("%s();", argv[1])
+	_add("extern void %s();", a(1))
+	_add("%s();", a(1))
 }
 __cmd(end) { _ib_
 	if (d > 0) d--;
